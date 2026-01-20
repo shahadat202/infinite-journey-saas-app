@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Application\InfiniteJourney.Application\InfiniteJourney.Application.csproj" />
+    <ProjectReference Include="..\..\AppShared\InfiniteJourney.Global.Shared\InfiniteJourney.Global.Shared.csproj" />
+    <ProjectReference Include="..\..\Domain\InfiniteJourney.Domain\InfiniteJourney.Domain.csproj" />
+    <ProjectReference Include="..\..\Infrustructure\InfiniteJourney.Infrustructure\InfiniteJourney.Infrustructure.csproj" />
+  </ItemGroup>
+
+</Project>
