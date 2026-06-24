@@ -1,0 +1,19 @@
+<section class="detail">
+  <a routerLink="/campaigns" class="back">← All campaigns</a>
+
+  @if (loading()) {
+    <p class="muted">Loading…</p>
+  } @else if (error()) {
+    <p class="error">{{ error() }}</p>
+  } @else if (campaign(); as c) {
+    <h1>{{ c.title }}</h1>
+    <p>{{ c.description }}</p>
+    <div class="progress">
+      <div class="bar" [style.width.%]="c.progressPercent"></div>
+    </div>
+    <p class="amounts">
+      <strong>{{ c.raisedAmount | number:'1.0-0' }}</strong>
+      raised of {{ c.targetAmount | number:'1.0-0' }} ({{ c.progressPercent }}%)
+    </p>
+  }
+</section>

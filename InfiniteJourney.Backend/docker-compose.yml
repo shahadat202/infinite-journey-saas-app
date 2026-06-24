@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: infinitejourney-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-infinite_journey_saas}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-System@1122}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: infinitejourney-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Web/InfiniteJourney.Web/Dockerfile
+    container_name: infinitejourney-api
+    env_file:
+      - .env
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-infinite_journey_saas};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-System@1122}
+      Keycloak__Authority: ${KEYCLOAK_AUTHORITY:-http://host.docker.internal:8080/realms/InfiniteJourney}
+      Keycloak__RequireHttpsMetadata: "false"
+      MultiTenancy__PlatformDomain: ${MULTITENANCY_PLATFORM_DOMAIN:-infinitejourney.com}
+    ports:
+      - "${API_PORT:-5274}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  postgres_data:

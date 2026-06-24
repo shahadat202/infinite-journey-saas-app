@@ -1,0 +1,21 @@
+<div class="layout">
+  <header class="header">
+    <div class="brand">
+      <a routerLink="/">{{ tenant.tenantLabel() }}</a>
+      <span class="tag">InfiniteJourney</span>
+    </div>
+    <nav>
+      <a routerLink="/campaigns">Campaigns</a>
+      @if (auth.authenticated) {
+        <span class="user">{{ auth.userName }}</span>
+        <button type="button" class="btn" (click)="auth.logout()">Logout</button>
+      } @else {
+        <button type="button" class="btn btn-primary" (click)="auth.login()">Sign in</button>
+      }
+    </nav>
+  </header>
+
+  <main class="main">
+    <router-outlet />
+  </main>
+</div>

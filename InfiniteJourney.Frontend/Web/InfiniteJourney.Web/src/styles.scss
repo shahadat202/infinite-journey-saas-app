@@ -1,0 +1,32 @@
+:root {
+  --primary: #1e3a8a;
+  --secondary: #10b981;
+  --text: #0f172a;
+  --muted: #64748b;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --background: #f8fafc;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--text);
+  margin: 0;
+}
+
+a {
+  color: var(--primary);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.error {
+  color: #b91c1c;
+}
