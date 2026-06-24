@@ -1,0 +1,8 @@
+{
+  "apiPort": 5274,
+  "keycloak": {
+    "url": "http://localhost:8080",
+    "realm": "InfiniteJourney",
+    "clientId": "infinite-journey-web"
+  }
+}
