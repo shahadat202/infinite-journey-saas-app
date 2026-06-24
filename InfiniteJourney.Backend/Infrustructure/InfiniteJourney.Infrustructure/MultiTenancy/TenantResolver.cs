@@ -1,3 +1,4 @@
+using InfiniteJourney.Global.Shared.Enums;
 using InfiniteJourney.Infrustructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -52,7 +53,7 @@ public sealed class TenantResolver : ITenantResolver
                 .FirstOrDefaultAsync(t => t.CustomDomain == normalizedHost, cancellationToken);
         }
 
-        if (tenant is null || tenant.Status != Domain.Aggregates.Tenant.TenantStatus.Active)
+        if (tenant is null || tenant.Status != TenantStatus.Active)
             return null;
 
         var enabledModules = await _dbContext.ModuleActivations

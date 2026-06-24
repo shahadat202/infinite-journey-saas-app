@@ -1,15 +1,12 @@
 using InfiniteJourney.Application.Campaigns.Dtos;
 using InfiniteJourney.Application.Campaigns.Mappings;
+using InfiniteJourney.Application.Common.Abstractions;
 using InfiniteJourney.Application.Common.Interfaces;
-using InfiniteJourney.Domain.Aggregates.Campaign;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace InfiniteJourney.Application.Campaigns.Queries.GetCampaigns;
+namespace InfiniteJourney.Application.Campaigns.Queries;
 
-public sealed record GetCampaignsQuery(CampaignStatus? Status = null) : IRequest<IReadOnlyList<CampaignListItemDto>>;
-
-public sealed class GetCampaignsQueryHandler : IRequestHandler<GetCampaignsQuery, IReadOnlyList<CampaignListItemDto>>
+public sealed class GetCampaignsQueryHandler : IQueryHandler<GetCampaignsQuery, IReadOnlyList<CampaignListItemDto>>
 {
     private readonly IApplicationDbContext _context;
 

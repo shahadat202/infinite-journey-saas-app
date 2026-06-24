@@ -1,19 +1,11 @@
 using InfiniteJourney.Application.Campaigns.Dtos;
+using InfiniteJourney.Application.Common.Abstractions;
 using InfiniteJourney.Application.Common.Interfaces;
 using InfiniteJourney.Domain.Aggregates.Campaign;
-using MediatR;
 
-namespace InfiniteJourney.Application.Campaigns.Commands.CreateCampaign;
+namespace InfiniteJourney.Application.Campaigns.Commands;
 
-public sealed record CreateCampaignCommand(
-    string Title,
-    string Description,
-    decimal TargetAmount,
-    string? CoverImageUrl = null,
-    DateTimeOffset? StartDate = null,
-    DateTimeOffset? EndDate = null) : IRequest<CreateCampaignResultDto>;
-
-public sealed class CreateCampaignCommandHandler : IRequestHandler<CreateCampaignCommand, CreateCampaignResultDto>
+public sealed class CreateCampaignCommandHandler : ICommandHandler<CreateCampaignCommand, CreateCampaignResultDto>
 {
     private readonly IApplicationDbContext _context;
     private readonly ITenantContext _tenantContext;

@@ -1,14 +1,12 @@
 using InfiniteJourney.Application.Campaigns.Dtos;
 using InfiniteJourney.Application.Campaigns.Mappings;
+using InfiniteJourney.Application.Common.Abstractions;
 using InfiniteJourney.Application.Common.Interfaces;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace InfiniteJourney.Application.Campaigns.Queries.GetCampaignById;
+namespace InfiniteJourney.Application.Campaigns.Queries;
 
-public sealed record GetCampaignByIdQuery(Guid CampaignId) : IRequest<CampaignDetailDto?>;
-
-public sealed class GetCampaignByIdQueryHandler : IRequestHandler<GetCampaignByIdQuery, CampaignDetailDto?>
+public sealed class GetCampaignByIdQueryHandler : IQueryHandler<GetCampaignByIdQuery, CampaignDetailDto?>
 {
     private readonly IApplicationDbContext _context;
 

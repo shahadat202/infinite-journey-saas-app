@@ -1,15 +1,12 @@
 using InfiniteJourney.Application.Campaigns.Dtos;
 using InfiniteJourney.Application.Campaigns.Mappings;
+using InfiniteJourney.Application.Common.Abstractions;
 using InfiniteJourney.Application.Common.Interfaces;
-using InfiniteJourney.Domain.Aggregates.Campaign;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace InfiniteJourney.Application.Campaigns.Commands.ActivateCampaign;
+namespace InfiniteJourney.Application.Campaigns.Commands;
 
-public sealed record ActivateCampaignCommand(Guid CampaignId) : IRequest<CampaignDetailDto>;
-
-public sealed class ActivateCampaignCommandHandler : IRequestHandler<ActivateCampaignCommand, CampaignDetailDto>
+public sealed class ActivateCampaignCommandHandler : ICommandHandler<ActivateCampaignCommand, CampaignDetailDto>
 {
     private readonly IApplicationDbContext _context;
 

@@ -4,10 +4,15 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateApiClient>true</GenerateApiClient>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="NSwag.AspNetCore" Version="14.2.0" />
+    <PackageReference Include="NSwag.MSBuild" Version="14.2.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -20,5 +25,9 @@
     <ProjectReference Include="..\..\Domain\InfiniteJourney.Domain\InfiniteJourney.Domain.csproj" />
     <ProjectReference Include="..\..\Infrustructure\InfiniteJourney.Infrustructure\InfiniteJourney.Infrustructure.csproj" />
   </ItemGroup>
+
+  <Target Name="GenerateTypeScriptClient" AfterTargets="Build" Condition="'$(GenerateApiClient)' == 'true'">
+    <Exec WorkingDirectory="$(ProjectDir)" Command="$(NSwagExe_Net90) run nswag.json" IgnoreExitCode="false" />
+  </Target>
 
 </Project>

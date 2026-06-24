@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace InfiniteJourney.Application.Campaigns.Commands.CreateCampaign;
+namespace InfiniteJourney.Application.Campaigns.Commands;
 
 public sealed class CreateCampaignCommandValidator : AbstractValidator<CreateCampaignCommand>
 {

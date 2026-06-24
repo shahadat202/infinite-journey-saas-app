@@ -1,89 +1,45 @@
-using FluentValidation;
-using InfiniteJourney.Application.Campaigns.Commands.ActivateCampaign;
-using InfiniteJourney.Application.Campaigns.Commands.CreateCampaign;
-using InfiniteJourney.Application.Campaigns.Queries.GetCampaignById;
-using InfiniteJourney.Application.Campaigns.Queries.GetCampaigns;
-using InfiniteJourney.Domain.Aggregates.Campaign;
+using InfiniteJourney.Application.Campaigns.Commands;
+using InfiniteJourney.Application.Campaigns.Dtos;
+using InfiniteJourney.Application.Campaigns.Queries;
+using InfiniteJourney.Global.Shared.Api;
 using InfiniteJourney.Web.Filters;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InfiniteJourney.Web.Controllers;
 
-[ApiController]
-[Route("api/campaigns")]
+[Route(ApiRoutes.Campaigns.Base)]
 [RequireModule("Campaigns")]
-public sealed class CampaignsController : ControllerBase
+public sealed class CampaignsController : ApiControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public CampaignsController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetCampaigns([FromQuery] CampaignStatus? status, CancellationToken cancellationToken)
-    {
-        var result = await _mediator.Send(new GetCampaignsQuery(status), cancellationToken);
-        return Ok(result);
-    }
+    [ProducesResponseType(typeof(IReadOnlyList<CampaignListItemDto>), StatusCodes.Status200OK)]
+    public Task<IActionResult> GetAll([AsParameters] GetCampaignsQuery query, CancellationToken cancellationToken)
+        => SendAsync(query, cancellationToken);
 
-    [HttpGet("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [HttpGet(ApiRoutes.Campaigns.ById)]
+    [ProducesResponseType(typeof(CampaignDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetCampaignById(Guid id, CancellationToken cancellationToken)
-    {
-        var result = await _mediator.Send(new GetCampaignByIdQuery(id), cancellationToken);
-        return result is null ? NotFound() : Ok(result);
-    }
+    public Task<IActionResult> GetById([AsParameters] GetCampaignByIdRoute route, CancellationToken cancellationToken)
+        => SendOrNotFoundAsync(new GetCampaignByIdQuery(route.Id), cancellationToken);
 
     [HttpPost]
     [Authorize(Policy = "TenantStaff")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> CreateCampaign(
-        [FromBody] CreateCampaignRequest request,
-        CancellationToken cancellationToken)
-    {
-        var result = await _mediator.Send(
-            new CreateCampaignCommand(
-                request.Title,
-                request.Description,
-                request.TargetAmount,
-                request.CoverImageUrl,
-                request.StartDate,
-                request.EndDate),
-            cancellationToken);
+    [ProducesResponseType(typeof(CreateCampaignResultDto), StatusCodes.Status201Created)]
+    public Task<IActionResult> Create(CreateCampaignCommand command, CancellationToken cancellationToken)
+        => SendCreatedAsync(
+            command,
+            cancellationToken,
+            result => (nameof(GetById), new { id = result.Id }, result));
 
-        return CreatedAtAction(nameof(GetCampaignById), new { id = result.Id }, result);
-    }
-
-    [HttpPost("{id:guid}/activate")]
+    [HttpPost(ApiRoutes.Campaigns.Activate)]
     [Authorize(Policy = "TenantStaff")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CampaignDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> ActivateCampaign(Guid id, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var result = await _mediator.Send(new ActivateCampaignCommand(id), cancellationToken);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
-    }
+    public Task<IActionResult> Activate([AsParameters] ActivateCampaignRoute route, CancellationToken cancellationToken)
+        => SendAsync(new ActivateCampaignCommand(route.Id), cancellationToken);
 }
 
-public sealed record CreateCampaignRequest(
-    string Title,
-    string Description,
-    decimal TargetAmount,
-    string? CoverImageUrl = null,
-    DateTimeOffset? StartDate = null,
-    DateTimeOffset? EndDate = null);
+public sealed record GetCampaignByIdRoute(Guid Id);
+
+public sealed record ActivateCampaignRoute(Guid Id);

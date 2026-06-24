@@ -1,4 +1,4 @@
-using InfiniteJourney.Domain.Aggregates.Campaign;
+using InfiniteJourney.Global.Shared.Enums;
 
 namespace InfiniteJourney.Application.Campaigns.Dtos;
 

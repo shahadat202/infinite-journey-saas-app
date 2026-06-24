@@ -1,5 +1,6 @@
 using System;
 using InfiniteJourney.Domain.Common;
+using InfiniteJourney.Global.Shared.Enums;
 
 namespace InfiniteJourney.Domain.Aggregates.User;
 

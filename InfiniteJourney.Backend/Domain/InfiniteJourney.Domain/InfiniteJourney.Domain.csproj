@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\AppShared\InfiniteJourney.Global.Shared\InfiniteJourney.Global.Shared.csproj" />
+  </ItemGroup>
+
 </Project>
