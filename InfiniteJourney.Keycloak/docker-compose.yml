@@ -1,0 +1,29 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: infinitejourney-keycloak
+    command: start-dev --import-realm
+    env_file:
+      - .env
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HEALTH_ENABLED: "true"
+      KC_HOSTNAME: ${KC_HOSTNAME:-localhost}
+      KC_HOSTNAME_PORT: ${KC_HOSTNAME_PORT:-8080}
+      KC_HTTP_ENABLED: ${KC_HTTP_ENABLED:-true}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./realms:/opt/keycloak/data/import:ro
+      - ./themes:/opt/keycloak/themes:ro
+      - keycloak_data:/opt/keycloak/data
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+
+volumes:
+  keycloak_data:

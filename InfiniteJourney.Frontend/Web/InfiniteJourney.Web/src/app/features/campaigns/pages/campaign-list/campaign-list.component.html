@@ -1,0 +1,28 @@
+<section class="campaign-list">
+  @if (loading()) {
+    <p class="muted">Loading campaigns…</p>
+  } @else if (error()) {
+    <p class="error">{{ error() }}</p>
+  } @else if (campaigns().length === 0) {
+    <p class="muted">No active campaigns yet.</p>
+  } @else {
+    <div class="grid">
+      @for (campaign of campaigns(); track campaign.id) {
+        <article class="card">
+          <h2>
+            <a [routerLink]="['/campaigns', campaign.id]">{{ campaign.title }}</a>
+          </h2>
+          <p>{{ campaign.description }}</p>
+          <div class="progress">
+            <div class="bar" [style.width.%]="progress(campaign)"></div>
+          </div>
+          <p class="amounts">
+            <strong>{{ campaign.raisedAmount | number:'1.0-0' }}</strong>
+            raised of {{ campaign.targetAmount | number:'1.0-0' }}
+            ({{ progress(campaign) }}%)
+          </p>
+        </article>
+      }
+    </div>
+  }
+</section>

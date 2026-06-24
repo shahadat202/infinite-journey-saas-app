@@ -1,0 +1,21 @@
+.back {
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.progress {
+  background: var(--border);
+  border-radius: 999px;
+  height: 10px;
+  margin: 1.5rem 0 0.75rem;
+  overflow: hidden;
+}
+
+.bar {
+  background: var(--primary);
+  height: 100%;
+}
+
+.amounts {
+  color: var(--muted);
+}

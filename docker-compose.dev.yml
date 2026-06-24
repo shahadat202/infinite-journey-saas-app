@@ -1,0 +1,16 @@
+# Local development — starts all three deployable projects
+#
+# Usage (from repo root):
+#   docker compose -f docker-compose.dev.yml up -d
+#
+# Each project can also run independently — see each project's README.
+
+include:
+  - path: InfiniteJourney.Keycloak/docker-compose.yml
+  - path: InfiniteJourney.Backend/docker-compose.yml
+  - path: InfiniteJourney.Frontend/docker-compose.yml
+
+# Shared network name for cross-container discovery (optional future use)
+networks:
+  default:
+    name: infinitejourney-dev

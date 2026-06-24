@@ -1,0 +1,40 @@
+/* InfiniteJourney login theme — extends official Keycloak base theme */
+
+:root {
+  --ij-primary: #1e3a8a;
+  --ij-secondary: #10b981;
+  --ij-surface: #ffffff;
+  --ij-text: #0f172a;
+}
+
+.login-pf body {
+  background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 50%, #ecfdf5 100%);
+}
+
+#kc-header-wrapper {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ij-primary);
+  text-transform: none;
+}
+
+#kc-form-buttons .btn-primary {
+  background-color: var(--ij-primary);
+  border-color: var(--ij-primary);
+}
+
+#kc-form-buttons .btn-primary:hover {
+  background-color: #1e40af;
+  border-color: #1e40af;
+}
+
+.card-pf {
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
+}
+
+.pf-c-form-control:focus {
+  border-color: var(--ij-primary);
+  box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.15);
+}

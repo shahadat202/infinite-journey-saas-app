@@ -1,0 +1,99 @@
+{
+  "id": "InfiniteJourney",
+  "realm": "InfiniteJourney",
+  "enabled": true,
+  "displayName": "InfiniteJourney",
+  "displayNameHtml": "<strong>InfiniteJourney</strong>",
+  "sslRequired": "none",
+  "loginTheme": "infinitejourney",
+  "accountTheme": "infinitejourney",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "roles": {
+    "realm": [
+      {
+        "name": "OrganizationAdmin",
+        "description": "Full organization administration"
+      },
+      {
+        "name": "Staff",
+        "description": "Tenant operational staff"
+      },
+      {
+        "name": "Member",
+        "description": "Organization member"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "infinite-journey-api",
+      "name": "InfiniteJourney API",
+      "description": "Bearer-only resource server — validates JWTs issued to users",
+      "enabled": true,
+      "publicClient": false,
+      "bearerOnly": true,
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true
+    },
+    {
+      "clientId": "infinite-journey-web",
+      "name": "InfiniteJourney Web App",
+      "description": "Public SPA client — Authorization Code + PKCE",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "rootUrl": "http://hope.localhost:4200",
+      "baseUrl": "http://hope.localhost:4200",
+      "redirectUris": [
+        "http://localhost:4200/*",
+        "http://localhost/*",
+        "http://hope.localhost:4200/*",
+        "http://relief.localhost:4200/*",
+        "http://hope.localhost/*",
+        "http://relief.localhost/*"
+      ],
+      "webOrigins": [
+        "+"
+      ],
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "fullScopeAllowed": true,
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "+"
+      },
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "profile",
+        "roles",
+        "email"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin@hope.org",
+      "email": "admin@hope.org",
+      "firstName": "Hope",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "OrganizationAdmin"
+      ]
+    }
+  ]
+}
