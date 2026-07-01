@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "generate-api": "nswag run nswag.json"
+    "generate-api": "nswag run nswag.json",
+    "present": "compodoc -p tsconfig.app.json -s -d dist-docs -o"
   },
   "prettier": {
     "printWidth": 100,
@@ -38,6 +39,7 @@
     "@angular/build": "^21.0.3",
     "@angular/cli": "^21.0.3",
     "@angular/compiler-cli": "^21.0.0",
+    "@compodoc/compodoc": "^2.0.0",
     "nswag": "^14.7.1",
     "typescript": "~5.9.2"
   }

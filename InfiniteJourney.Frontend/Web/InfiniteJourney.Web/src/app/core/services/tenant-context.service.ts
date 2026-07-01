@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { AppConfigService } from '../config/app-config.service';
+import { AppConfigService } from '@core/config/app-config.service';
 
 @Injectable({ providedIn: 'root' })
 export class TenantContextService {

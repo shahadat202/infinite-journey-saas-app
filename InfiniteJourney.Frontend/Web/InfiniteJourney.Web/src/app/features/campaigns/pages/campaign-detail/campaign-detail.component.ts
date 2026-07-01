@@ -1,8 +1,7 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { CampaignApiService } from '../../../../core/services/campaign-api.service';
-import { CampaignDetail } from '../../../../core/models/campaign.model';
+import { CampaignsClient, CampaignDetailDto, GetCampaignByIdRoute } from '@generated/infinite-journey-apis';
 
 @Component({
   selector: 'app-campaign-detail',
@@ -12,9 +11,9 @@ import { CampaignDetail } from '../../../../core/models/campaign.model';
 })
 export class CampaignDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly campaignApi = inject(CampaignApiService);
+  private readonly campaignsClient = inject(CampaignsClient);
 
-  protected readonly campaign = signal<CampaignDetail | null>(null);
+  protected readonly campaign = signal<CampaignDetailDto | null>(null);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
 
@@ -26,7 +25,7 @@ export class CampaignDetailComponent implements OnInit {
       return;
     }
 
-    this.campaignApi.getCampaign(id).subscribe({
+    this.campaignsClient.campaigns_GetById(id, new GetCampaignByIdRoute({ id: id })).subscribe({
       next: (item) => {
         this.campaign.set(item);
         this.loading.set(false);

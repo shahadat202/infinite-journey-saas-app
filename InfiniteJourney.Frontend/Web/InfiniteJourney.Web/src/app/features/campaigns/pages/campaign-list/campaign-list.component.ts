@@ -1,8 +1,7 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CampaignApiService } from '../../../../core/services/campaign-api.service';
-import { CampaignListItem } from '../../../../core/models/campaign.model';
+import { CampaignsClient, CampaignListItemDto, CampaignStatus, GetCampaignsQuery } from '@generated/infinite-journey-apis';
 
 @Component({
   selector: 'app-campaign-list',
@@ -11,14 +10,14 @@ import { CampaignListItem } from '../../../../core/models/campaign.model';
   styleUrl: './campaign-list.component.scss'
 })
 export class CampaignListComponent implements OnInit {
-  private readonly campaignApi = inject(CampaignApiService);
+  private readonly campaignsClient = inject(CampaignsClient);
 
-  protected readonly campaigns = signal<CampaignListItem[]>([]);
+  protected readonly campaigns = signal<CampaignListItemDto[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
 
   ngOnInit(): void {
-    this.campaignApi.getCampaigns('Active').subscribe({
+    this.campaignsClient.campaigns_GetAll(new GetCampaignsQuery({ status: CampaignStatus.Active })).subscribe({
       next: (items) => {
         this.campaigns.set(items);
         this.loading.set(false);
@@ -30,7 +29,9 @@ export class CampaignListComponent implements OnInit {
     });
   }
 
-  progress(item: CampaignListItem): number {
-    return item.targetAmount > 0 ? Math.round((item.raisedAmount / item.targetAmount) * 100) : 0;
+  progress(item: CampaignListItemDto): number {
+    return (item.targetAmount && item.targetAmount > 0)
+      ? Math.round(((item.raisedAmount || 0) / item.targetAmount) * 100)
+      : 0;
   }
 }

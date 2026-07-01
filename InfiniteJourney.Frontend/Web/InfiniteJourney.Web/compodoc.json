@@ -1,0 +1,8 @@
+{
+  "tsconfig": "tsconfig.app.json",
+  "output": "dist-docs",
+  "name": "InfiniteJourney - Enterprise SaaS Platform",
+  "theme": "material",
+  "includes": "../../../docs/compodoc-additional-docs",
+  "includesName": "Architectural Documentation"
+}
