@@ -2,11 +2,11 @@
 
 Three **independently deployable** projects. Read this once.
 
-| Project | Folder | What it runs |
-|---------|--------|--------------|
-| Keycloak | `InfiniteJourney.Keycloak/` | Identity server |
-| Backend | `InfiniteJourney.Backend/` | API + PostgreSQL + Redis |
-| Frontend | `InfiniteJourney.Frontend/` | Angular SPA |
+| Project  | Folder                      | What it runs             |
+| -------- | --------------------------- | ------------------------ |
+| Keycloak | `InfiniteJourney.Keycloak/` | Identity server          |
+| Backend  | `InfiniteJourney.Backend/`  | API + PostgreSQL + Redis |
+| Frontend | `InfiniteJourney.Frontend/` | Angular SPA              |
 
 Architecture diagram: [ARCHITECTURE.md](ARCHITECTURE.md)
 
@@ -14,11 +14,11 @@ Architecture diagram: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Migrations vs pgAdmin (important)
 
-| Action | Result |
-|--------|--------|
-| `dotnet ef migrations add` | C# files only — **nothing in pgAdmin** |
-| Start Backend API once | Creates **tables** in PostgreSQL |
-| pgAdmin shows database | Only when Postgres is running + you connect to the **same server** |
+| Action                     | Result                                                             |
+| -------------------------- | ------------------------------------------------------------------ |
+| `dotnet ef migrations add` | C# files only — **nothing in pgAdmin**                             |
+| Start Backend API once     | Creates **tables** in PostgreSQL                                   |
+| pgAdmin shows database     | Only when Postgres is running + you connect to the **same server** |
 
 You do **not** create tables manually. Create the **database** once (or use Docker), then run the API.
 
@@ -72,13 +72,13 @@ dotnet run --project Web/InfiniteJourney.Web
 
 **pgAdmin connection (Docker Postgres from Backend compose):**
 
-| Field | Value |
-|-------|-------|
-| Host | `localhost` |
-| Port | `5432` |
+| Field    | Value                   |
+| -------- | ----------------------- |
+| Host     | `localhost`             |
+| Port     | `5432`                  |
 | Database | `infinite_journey_saas` |
-| Username | `postgres` |
-| Password | `System@1122` |
+| Username | `postgres`              |
+| Password | `postgresql2002`        |
 
 Refresh pgAdmin **after** the API runs once — tables appear automatically.
 
@@ -104,11 +104,11 @@ Frontend  ──login──►  Keycloak  ──JWT──►  Frontend  ──Be
                          └──────── validates JWT signature ─────────────┘
 ```
 
-| Project | Config | Example |
-|---------|--------|---------|
-| Keycloak | `.env` | `KC_HOSTNAME=localhost` |
-| Backend | `appsettings.json` | `Keycloak:Authority` = `http://localhost:8080/realms/InfiniteJourney` |
-| Frontend | `public/assets/app-config.json` | `keycloak.url` = `http://localhost:8080` |
+| Project  | Config                          | Example                                                               |
+| -------- | ------------------------------- | --------------------------------------------------------------------- |
+| Keycloak | `.env`                          | `KC_HOSTNAME=localhost`                                               |
+| Backend  | `appsettings.json`              | `Keycloak:Authority` = `http://localhost:8080/realms/InfiniteJourney` |
+| Frontend | `public/assets/app-config.json` | `keycloak.url` = `http://localhost:8080`                              |
 
 In production, only URLs change — no code changes.
 
@@ -145,13 +145,13 @@ npm run generate-api
 
 ## Troubleshooting
 
-| Problem | Fix |
-|---------|-----|
+| Problem                | Fix                                                                                            |
+| ---------------------- | ---------------------------------------------------------------------------------------------- |
 | No database in pgAdmin | Start Docker Desktop → `cd InfiniteJourney.Backend && docker compose up -d postgres` → run API |
-| Tenant API 404 | Use `hope.localhost:5274`, not `localhost:5274` |
-| Login fails | Keycloak running? Realm imported? Check http://localhost:8080 |
-| CORS errors | Backend `Cors:AllowedOrigins` must include your frontend origin |
-| Port 5432 in use | Stop local PostgreSQL or change Backend compose port |
+| Tenant API 404         | Use `hope.localhost:5274`, not `localhost:5274`                                                |
+| Login fails            | Keycloak running? Realm imported? Check http://localhost:8080                                  |
+| CORS errors            | Backend `Cors:AllowedOrigins` must include your frontend origin                                |
+| Port 5432 in use       | Stop local PostgreSQL or change Backend compose port                                           |
 
 ---
 

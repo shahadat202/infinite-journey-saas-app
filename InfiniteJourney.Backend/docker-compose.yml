@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-infinite_journey_saas}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-System@1122}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgresql2002}
     ports:
       - "5432:5432"
     volumes:
@@ -36,7 +36,7 @@ services:
       - .env
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
-      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-infinite_journey_saas};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-System@1122}
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-infinite_journey_saas};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgresql2002}
       Keycloak__Authority: ${KEYCLOAK_AUTHORITY:-http://host.docker.internal:8080/realms/InfiniteJourney}
       Keycloak__RequireHttpsMetadata: "false"
       MultiTenancy__PlatformDomain: ${MULTITENANCY_PLATFORM_DOMAIN:-infinitejourney.com}

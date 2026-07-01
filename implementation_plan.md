@@ -25,12 +25,14 @@ This document defines the comprehensive, production-ready architectural design f
 ## Phase 1: Business Analysis
 
 ### 1.1 Business Goals
+
 - **Empower Organizations**: Provide a zero-overhead digital operating system for small to large organizations.
 - **Conversion Optimization**: Maximize donation conversions and member sign-ups via storytelling-focused user experiences.
 - **Financial Transparency**: Provide real-time financial tracking, project updates, and impact metrics to build public trust.
 - **Unified Upgrades**: Maintain a single codebase where enhancements are instantly deployable to all organizations.
 
 ### 1.2 User Personas
+
 - **Platform Super Admin**: Manages SaaS operations, tenant provisioning, system health, and billing.
 - **Tenant Owner / Admin**: Has complete authority over their tenant’s website, branding, activated modules, staff roles, and finances.
 - **Volunteer Coordinator / Content Manager**: Tenant-level operational staff who manage volunteers, events, campaigns, and blogs.
@@ -38,15 +40,17 @@ This document defines the comprehensive, production-ready architectural design f
 - **Public Guest**: General visitors browsing tenant landing pages or articles.
 
 ### 1.3 Tenant Types
+
 - **Dawah & Islamic Centers**: Focus on prayer times, educational courses, memberships, and community events.
 - **Charities & NGOs**: Focus on global relief projects, sponsorships, disaster response, and donor relations.
 - **Local Volunteer / Community Groups**: Focus on local cleanups, social welfare, volunteer shifts, and news.
 
 ### 1.4 SaaS Monetization Models
+
 1. **SaaS Subscription Tiers**:
-   - *Basic*: Shared database, subdomain (`tenant.infinitejourney.com`), basic modules.
-   - *Pro*: Custom domains, advanced theme customization, access to membership & course modules.
-   - *Enterprise*: Dedicated database, custom Keycloak SSO federation, unlimited media storage.
+   - _Basic_: Shared database, subdomain (`tenant.infinitejourney.com`), basic modules.
+   - _Pro_: Custom domains, advanced theme customization, access to membership & course modules.
+   - _Enterprise_: Dedicated database, custom Keycloak SSO federation, unlimited media storage.
 2. **Transaction Fees**: A dynamic percentage cut (e.g., 0.5% - 2%) on donations processed through platform-managed payment flows.
 
 ---
@@ -55,23 +59,27 @@ This document defines the comprehensive, production-ready architectural design f
 
 We evaluate four primary database tenancy designs below:
 
-| Criteria | Option A: Shared DB + TenantId | Option B: Schema-per-Tenant | Option C: DB-per-Tenant | Option D: Hybrid Strategy (Recommended) |
-| :--- | :--- | :--- | :--- | :--- |
-| **Data Isolation** | Logical (Row level) | Schema logical | Physical isolation | Dynamic based on Subscription tier |
-| **Cost Efficiency** | High (Low DB overhead) | Medium | Low (High server cost) | Optimal (Starter shared, Premium isolated) |
-| **Complexity** | Low | Medium-High | High | Medium-High (Supported by EF Core) |
-| **Backup & Restore**| Difficult per tenant | Moderate | Very Easy | Easy for premium, logical for standard |
-| **Scalability** | Standard DB limits | Limit on schemas (PG) | Highly scalable | Excellent horizontal scaling |
+| Criteria             | Option A: Shared DB + TenantId | Option B: Schema-per-Tenant | Option C: DB-per-Tenant | Option D: Hybrid Strategy (Recommended)    |
+| :------------------- | :----------------------------- | :-------------------------- | :---------------------- | :----------------------------------------- |
+| **Data Isolation**   | Logical (Row level)            | Schema logical              | Physical isolation      | Dynamic based on Subscription tier         |
+| **Cost Efficiency**  | High (Low DB overhead)         | Medium                      | Low (High server cost)  | Optimal (Starter shared, Premium isolated) |
+| **Complexity**       | Low                            | Medium-High                 | High                    | Medium-High (Supported by EF Core)         |
+| **Backup & Restore** | Difficult per tenant           | Moderate                    | Very Easy               | Easy for premium, logical for standard     |
+| **Scalability**      | Standard DB limits             | Limit on schemas (PG)       | Highly scalable         | Excellent horizontal scaling               |
 
 ### 2.1 Selected Approach: Option D (Hybrid Tenancy)
+
 Standard tiers share a PostgreSQL database. EF Core enforces data isolation using **Global Query Filters** and a dynamic query interceptor:
+
 ```csharp
 modelBuilder.Entity<BaseTenantEntity>()
     .HasQueryFilter(e => e.TenantId == _tenantContext.TenantId);
 ```
+
 Enterprise tenants connect to their own physical PostgreSQL instances. The system resolves connection strings dynamically at runtime using a Redis-backed tenant registry lookup.
 
 ### 2.2 Technical Component Design
+
 - **Tenant Resolution Middleware**:
   1. Inspects host header (e.g., `org1.infinitejourney.com` or `custom-domain.org`).
   2. Resolves tenant metadata (Tenant ID, Active status, Connection String, Theme, Active Features) from Redis cache; falls back to the database.
@@ -109,6 +117,7 @@ graph TD
 ### 3.1 Bounded Context Definitions
 
 #### 1. Tenant Management Context
+
 - **Purpose**: SaaS administrative plane.
 - **Aggregate Roots**: `Tenant`, `SubscriptionPlan`.
 - **Entities**: `TenantDomain`, `BillingContact`.
@@ -116,6 +125,7 @@ graph TD
 - **Domain Events**: `TenantProvisionedEvent`, `TenantSuspendedEvent`.
 
 #### 2. Identity & Access Management (IAM) Context
+
 - **Purpose**: User profiles, memberships, and role-based permissions.
 - **Aggregate Roots**: `User`, `Role`.
 - **Entities**: `Membership` (links User to Tenant with status), `Permission`.
@@ -123,6 +133,7 @@ graph TD
 - **Domain Events**: `UserRegisteredEvent`, `MembershipAssignedEvent`.
 
 #### 3. Campaign & Donation Context
+
 - **Purpose**: Raising funds and transparent donor management.
 - **Aggregate Roots**: `Campaign`, `Donation`.
 - **Entities**: `RecurringPledge`, `DonorProfile`.
@@ -130,6 +141,7 @@ graph TD
 - **Domain Events**: `DonationReceivedEvent`, `CampaignGoalReachedEvent`.
 
 #### 4. Event & Volunteer Context
+
 - **Purpose**: Community mobilization, volunteering tracking.
 - **Aggregate Roots**: `Event`, `VolunteerApplication`.
 - **Entities**: `Shift`, `AttendanceLog`.
@@ -143,7 +155,9 @@ graph TD
 We implement authentication and authorization using Keycloak.
 
 ### 4.1 Keycloak Realm Architecture
+
 To support both low-cost standard tenants and high-security enterprise tenants:
+
 1. **Shared Multi-Tenant Realm (`InfiniteJourney-Tenants`)**:
    Standard and Pro tenants share a single Keycloak realm.
    - Users have custom attributes containing their authorized `tenant_ids`.
@@ -177,6 +191,7 @@ sequenceDiagram
 ```
 
 ### 4.3 Database Schema (IAM Portion)
+
 ```sql
 CREATE TABLE Users (
     Id UUID PRIMARY KEY,
@@ -205,12 +220,12 @@ CREATE UNIQUE INDEX idx_membership_tenant_user ON Memberships(TenantId, UserId);
 
 Entities are classified as follows:
 
-| Classification | Entities |
-| :--- | :--- |
-| **Essential** | `Tenant`, `User`, `Membership`, `Campaign`, `Donation`, `ModuleActivation`, `Theme` |
-| **Important** | `Event`, `VolunteerShift`, `Page`, `MediaFile`, `AuditLog`, `SystemConfig` |
-| **Optional**  | `Course`, `Sponsorship`, `BeneficiaryCase`, `NewsletterSubscriber` |
-| **Future**    | `AnalyticsReport`, `PlatformAuditorLog`, `PaymentTerminalIntegration` |
+| Classification | Entities                                                                            |
+| :------------- | :---------------------------------------------------------------------------------- |
+| **Essential**  | `Tenant`, `User`, `Membership`, `Campaign`, `Donation`, `ModuleActivation`, `Theme` |
+| **Important**  | `Event`, `VolunteerShift`, `Page`, `MediaFile`, `AuditLog`, `SystemConfig`          |
+| **Optional**   | `Course`, `Sponsorship`, `BeneficiaryCase`, `NewsletterSubscriber`                  |
+| **Future**     | `AnalyticsReport`, `PlatformAuditorLog`, `PaymentTerminalIntegration`               |
 
 ---
 
@@ -263,7 +278,10 @@ Tenant portals are rendered dynamically using configurable blocks.
       "OpenGraphImage": "/media/og-about.jpg"
     },
     "Layout": [
-      { "Type": "HeroSection", "Params": { "Title": "Hello!", "BgUrl": "/media/bg.jpg" } },
+      {
+        "Type": "HeroSection",
+        "Params": { "Title": "Hello!", "BgUrl": "/media/bg.jpg" }
+      },
       { "Type": "DonationWidget", "Params": { "CampaignId": "campaign-uuid" } }
     ]
   }
@@ -276,6 +294,7 @@ Tenant portals are rendered dynamically using configurable blocks.
 We design a runtime theming system utilizing dynamic CSS variable injection.
 
 ### 8.1 Tailored Theme Configuration
+
 ```json
 {
   "PrimaryColor": "#1E3A8A",
@@ -287,12 +306,21 @@ We design a runtime theming system utilizing dynamic CSS variable injection.
 ```
 
 ### 8.2 Runtime Style Injection (Angular)
+
 On application bootstrap, the configurations are resolved from `TenantContext` and injected into the document root:
+
 ```typescript
-document.documentElement.style.setProperty('--primary-color', theme.PrimaryColor);
-document.documentElement.style.setProperty('--secondary-color', theme.SecondaryColor);
-document.documentElement.style.setProperty('--font-family', theme.FontFamily);
+document.documentElement.style.setProperty(
+  "--primary-color",
+  theme.PrimaryColor,
+);
+document.documentElement.style.setProperty(
+  "--secondary-color",
+  theme.SecondaryColor,
+);
+document.documentElement.style.setProperty("--font-family", theme.FontFamily);
 ```
+
 Contrast metrics are computed at runtime using WCAG compliance helper methods to ensure text overlays automatically shift between light and dark modes based on background luminance values.
 
 ---
@@ -322,6 +350,7 @@ InfiniteJourney.Backend/
 ```
 
 On the frontend, Angular uses standalone directory layers:
+
 ```
 frontend/src/app/
 ├── core/                     # Authentication, Interceptors, Guards, Tenant-Context resolving
@@ -334,6 +363,7 @@ frontend/src/app/
 ## Phase 10: Database Design
 
 ### 10.1 Schema Structure
+
 We create indexes with tenant qualifiers to guarantee data isolation speed.
 
 ```sql
@@ -374,6 +404,7 @@ CREATE INDEX idx_donations_tenant_campaign ON Donations(TenantId, CampaignId);
 ## Phase 11: API Strategy
 
 ### 11.1 OpenAPI and Client Generation
+
 - **NSwag Integration**:
   The backend hosts an OpenAPI specification via NSwag. A client generation build script automatically updates the Angular services:
   ```powershell
@@ -409,14 +440,15 @@ CREATE INDEX idx_donations_tenant_campaign ON Donations(TenantId, CampaignId);
 ## Phase 13: Deployment
 
 ### 13.1 Docker Compose Architecture
+
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   postgres:
     image: postgres:15-alpine
     environment:
       POSTGRES_DB: infinite_journey_saas
-      POSTGRES_PASSWORD: System@1122
+      POSTGRES_PASSWORD: postgresql2002
     ports:
       - "5432:5432"
   redis:
@@ -450,13 +482,16 @@ services:
 We target the **Campaign** and **Donation** features as our reference business module.
 
 ### 14.1 Justification for Choice
+
 Campaigns and Donations test:
+
 - Database row-level isolation logic.
 - Transaction validation rules.
 - Real-time financial calculations (e.g. updating campaign raised totals using Domain Events).
 - Integration with external payment flows and audit tracking.
 
 ### 14.2 Technical Execution Tasklist
+
 ```mermaid
 graph TD
     T1[Implement Base Tenant Context] --> T2[Configure EF Core Tenant Interceptors]
@@ -472,6 +507,7 @@ graph TD
 ## Verification Plan
 
 ### Automated Tests
+
 - **Backend Unit Tests**: Verify `TenantContext` injection and EF Core query filtering logic.
   ```powershell
   dotnet test InfiniteJourney.Backend/Tests/InfiniteJourney.Tests
@@ -479,5 +515,6 @@ graph TD
 - **Security Audit Tests**: Attempt cross-tenant queries programmatically and verify that `TenantViolationException` is thrown.
 
 ### Manual Verification
+
 - Deploy using the Docker Compose setup.
 - Log in to Keycloak, configure two test tenants, and access URLs via local hostnames (e.g. `tenant1.localhost:5000` and `tenant2.localhost:5000`). Confirm that database entities created in `tenant1` never appear in `tenant2`.
