@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "generate-api": "nswag run nswag.json",
-    "present": "compodoc -p tsconfig.app.json -s -d dist-docs -o"
+    "present": "compodoc -p tsconfig.app.json -s -d dist-docs -r 8085 -o"
   },
   "prettier": {
     "printWidth": 100,

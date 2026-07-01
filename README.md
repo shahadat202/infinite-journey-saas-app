@@ -6,11 +6,11 @@ Enterprise multi-tenant platform for non-profits, Islamic organizations, chariti
 
 Each project is **independent** — own Docker, own README, deploy separately:
 
-| Project | Purpose | Local start |
-|---------|---------|-------------|
-| [InfiniteJourney.Keycloak](InfiniteJourney.Keycloak/) | Identity (OIDC/JWT) | `docker compose up -d` |
-| [InfiniteJourney.Backend](InfiniteJourney.Backend/) | API + PostgreSQL + Redis | `docker compose up -d` |
-| [InfiniteJourney.Frontend](InfiniteJourney.Frontend/) | Angular SPA (nginx) | `docker compose up -d --build` |
+| Project                                               | Purpose                  | Local start                    |
+| ----------------------------------------------------- | ------------------------ | ------------------------------ |
+| [InfiniteJourney.Keycloak](InfiniteJourney.Keycloak/) | Identity (OIDC/JWT)      | `docker compose up -d`         |
+| [InfiniteJourney.Backend](InfiniteJourney.Backend/)   | API + PostgreSQL + Redis | `docker compose up -d`         |
+| [InfiniteJourney.Frontend](InfiniteJourney.Frontend/) | Angular SPA (nginx)      | `docker compose up -d --build` |
 
 **Full setup guide:** [docs/SETUP.md](docs/SETUP.md)  
 **Architecture & IAM flow:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
@@ -47,12 +47,12 @@ npm start
 
 ### Open
 
-| URL | Service |
-|-----|---------|
-| http://hope.localhost:4200 | Frontend (Hope tenant) |
-| http://hope.localhost:5274/api/campaigns | Backend API |
-| http://localhost:5274/swagger | API docs |
-| http://localhost:8080 | Keycloak admin |
+| URL                                      | Service                |
+| ---------------------------------------- | ---------------------- |
+| http://hope.localhost:4200               | Frontend (Hope tenant) |
+| http://hope.localhost:5274/api/campaigns | Backend API            |
+| http://localhost:5274/swagger            | API docs               |
+| http://localhost:8080                    | Keycloak admin         |
 
 **Test user:** `admin@hope.org` / `Password123!`
 
@@ -86,15 +86,15 @@ No shared secrets between Frontend and Backend — only the issuer URL must matc
 
 ## Phase 1 status
 
-| Task | Status |
-|------|--------|
-| T1–T2 Multi-tenancy foundation | Done |
-| T3 Keycloak JWT auth | Done |
-| T4 Domain model | Done |
-| T5 Campaign API | Done |
-| T6 NSwag | Done |
-| T7 Angular UI | Done |
-| Three-project deployment structure | Done |
+| Task                               | Status |
+| ---------------------------------- | ------ |
+| T1–T2 Multi-tenancy foundation     | Done   |
+| T3 Keycloak JWT auth               | Done   |
+| T4 Domain model                    | Done   |
+| T5 Campaign API                    | Done   |
+| T6 NSwag                           | Done   |
+| T7 Angular UI                      | Done   |
+| Three-project deployment structure | Done   |
 
 See `implementation_plan.md` for the full blueprint.
 
@@ -106,3 +106,6 @@ See `implementation_plan.md` for the full blueprint.
 2. **User sync** — create `User` + `Membership` records on first Keycloak login
 3. **Production Keycloak** — `start` mode, external DB, TLS, remove dev users
 4. **CI/CD per project** — separate pipelines for Keycloak, Backend, Frontend images
+
+admin@hope.org
+Password123!
