@@ -1,111 +1,51 @@
 # InfiniteJourney SaaS Platform
 
-Enterprise multi-tenant platform for non-profits, Islamic organizations, charities, and community groups.
+Enterprise multi-tenant platform for nonprofits, Islamic organizations, charities, and community groups.
 
-## Three deployable projects
+## Quick start
 
-Each project is **independent** — own Docker, own README, deploy separately:
+The local setup is intentionally simple. Start each project directly with its own command.
 
-| Project                                               | Purpose                  | Local start                    |
-| ----------------------------------------------------- | ------------------------ | ------------------------------ |
-| [InfiniteJourney.Keycloak](InfiniteJourney.Keycloak/) | Identity (OIDC/JWT)      | `docker compose up -d`         |
-| [InfiniteJourney.Backend](InfiniteJourney.Backend/)   | API + PostgreSQL + Redis | `docker compose up -d`         |
-| [InfiniteJourney.Frontend](InfiniteJourney.Frontend/) | Angular SPA (nginx)      | `docker compose up -d --build` |
-
-**Full setup guide:** [docs/SETUP.md](docs/SETUP.md)  
-**Architecture & IAM flow:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-
----
-
-## Quick start (local development)
-
-### Option A — All services at once
+### 1. Keycloak
 
 ```powershell
-docker compose -f docker-compose.dev.yml up -d
+cd InfiniteJourney.Keycloak
+docker compose up -d
 ```
 
-### Option B — Step by step (recommended while learning)
+### 2. Backend
 
 ```powershell
-# 1. Identity
-cd InfiniteJourney.Keycloak
-copy .env.example .env
-docker compose up -d
-
-# 2. Backend (PostgreSQL + API)
-cd ../InfiniteJourney.Backend
-copy .env.example .env
-docker compose up -d postgres redis
+cd InfiniteJourney.Backend
 dotnet run --project Web/InfiniteJourney.Web
+```
 
-# 3. Frontend
-cd ../InfiniteJourney.Frontend/Web/InfiniteJourney.Web
+### 3. Frontend
+
+```powershell
+cd InfiniteJourney.Frontend/Web/InfiniteJourney.Web
 npm install
 npm start
 ```
 
-### Open
+### Open the app
 
-| URL                                      | Service                |
-| ---------------------------------------- | ---------------------- |
-| http://hope.localhost:4200               | Frontend (Hope tenant) |
-| http://hope.localhost:5274/api/campaigns | Backend API            |
-| http://localhost:5274/swagger            | API docs               |
-| http://localhost:8080                    | Keycloak admin         |
+- Frontend: http://hope.localhost:4200
+- Backend API: http://hope.localhost:5274/api/campaigns
+- Swagger: http://localhost:5274/swagger
+- Keycloak admin: http://localhost:8080
 
-**Test user:** `admin@hope.org` / `Password123!`
+### Default test account
 
----
+- Email: admin@hope.org
+- Password: Password123!
 
-## Repository layout
+> No extra environment-file copy step is required for this local flow.
 
-```
-infinite-journey-saas-app/
-├── InfiniteJourney.Keycloak/     # Realm, theme, Keycloak Docker
-├── InfiniteJourney.Backend/      # .NET 9 Clean Architecture API
-├── InfiniteJourney.Frontend/     # Angular 21 SPA
-├── docs/                         # Platform-wide documentation
-├── docker-compose.dev.yml        # Optional: run all three locally
-├── implementation_plan.md
-└── initial_plan.md
-```
+## Project layout
 
----
-
-## How Keycloak connects (summary)
-
-1. **Frontend** redirects user to Keycloak login (`infinite-journey-web` client, PKCE)
-2. Keycloak returns a **JWT access token** to the browser
-3. **Frontend** sends `Authorization: Bearer <token>` on every API call
-4. **Backend** validates the JWT against Keycloak's public keys (`Keycloak:Authority`)
-
-No shared secrets between Frontend and Backend — only the issuer URL must match.
-
----
-
-## Phase 1 status
-
-| Task                               | Status |
-| ---------------------------------- | ------ |
-| T1–T2 Multi-tenancy foundation     | Done   |
-| T3 Keycloak JWT auth               | Done   |
-| T4 Domain model                    | Done   |
-| T5 Campaign API                    | Done   |
-| T6 NSwag                           | Done   |
-| T7 Angular UI                      | Done   |
-| Three-project deployment structure | Done   |
-
-See `implementation_plan.md` for the full blueprint.
-
----
-
-## Suggested next move
-
-1. **Donation module** — payment flow + domain events (natural follow-up to Campaigns)
-2. **User sync** — create `User` + `Membership` records on first Keycloak login
-3. **Production Keycloak** — `start` mode, external DB, TLS, remove dev users
-4. **CI/CD per project** — separate pipelines for Keycloak, Backend, Frontend images
-
-admin@hope.org
-Password123!
+- [InfiniteJourney.Keycloak](InfiniteJourney.Keycloak/) — Keycloak identity and realm configuration
+- [InfiniteJourney.Backend](InfiniteJourney.Backend/) — ASP.NET Core API
+- [InfiniteJourney.Frontend](InfiniteJourney.Frontend/) — Angular frontend
+- [docs/SETUP.md](docs/SETUP.md) — setup guide
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — architecture overview
