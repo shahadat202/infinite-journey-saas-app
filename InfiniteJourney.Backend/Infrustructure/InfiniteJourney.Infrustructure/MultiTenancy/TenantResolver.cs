@@ -46,6 +46,16 @@ public sealed class TenantResolver : ITenantResolver
                 .AsNoTracking()
                 .FirstOrDefaultAsync(t => t.Subdomain == subdomain, cancellationToken);
         }
+        else if (normalizedHost == "localhost" || normalizedHost == "127.0.0.1")
+        {
+            var defaultTenantSubdomain = _configuration["MultiTenancy:DefaultTenantSubdomain"];
+            if (string.IsNullOrWhiteSpace(defaultTenantSubdomain))
+                return null;
+
+            tenant = await _dbContext.Tenants
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.Subdomain == defaultTenantSubdomain, cancellationToken);
+        }
         else
         {
             tenant = await _dbContext.Tenants

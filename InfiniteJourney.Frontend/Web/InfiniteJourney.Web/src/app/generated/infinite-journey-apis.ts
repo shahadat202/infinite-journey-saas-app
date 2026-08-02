@@ -16,7 +16,7 @@ import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from '@angula
 export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 
 export interface ICampaignsClient {
-    campaigns_GetAll(query: GetCampaignsQuery): Observable<CampaignListItemDto[]>;
+    campaigns_GetAll(status: CampaignStatus | null | undefined): Observable<CampaignListItemDto[]>;
     campaigns_Create(command: CreateCampaignCommand): Observable<CreateCampaignResultDto>;
     campaigns_GetById(id: string, route: GetCampaignByIdRoute): Observable<CampaignDetailDto>;
     campaigns_Activate(id: string, route: ActivateCampaignRoute): Observable<CampaignDetailDto>;
@@ -35,18 +35,16 @@ export class CampaignsClient implements ICampaignsClient {
         this.baseUrl = baseUrl ?? "";
     }
 
-    campaigns_GetAll(query: GetCampaignsQuery): Observable<CampaignListItemDto[]> {
-        let url_ = this.baseUrl + "/api/campaigns";
+    campaigns_GetAll(status: CampaignStatus | null | undefined): Observable<CampaignListItemDto[]> {
+        let url_ = this.baseUrl + "/api/campaigns?";
+        if (status !== undefined && status !== null)
+            url_ += "Status=" + encodeURIComponent("" + status) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(query);
-
         let options_ : any = {
-            body: content_,
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
-                "Content-Type": "application/json",
                 "Accept": "application/json"
             })
         };
@@ -344,42 +342,6 @@ export enum CampaignStatus {
     Active = 1,
     Suspended = 2,
     Ended = 3,
-}
-
-export class GetCampaignsQuery implements IGetCampaignsQuery {
-    status?: CampaignStatus | undefined;
-
-    constructor(data?: IGetCampaignsQuery) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.status = _data["status"];
-        }
-    }
-
-    static fromJS(data: any): GetCampaignsQuery {
-        data = typeof data === 'object' ? data : {};
-        let result = new GetCampaignsQuery();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["status"] = this.status;
-        return data;
-    }
-}
-
-export interface IGetCampaignsQuery {
-    status?: CampaignStatus | undefined;
 }
 
 export class CampaignDetailDto implements ICampaignDetailDto {

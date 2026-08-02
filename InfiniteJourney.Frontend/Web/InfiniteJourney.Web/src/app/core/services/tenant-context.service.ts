@@ -10,13 +10,17 @@ export class TenantContextService {
   readonly tenantLabel = computed(() =>
     this._subdomain()
       ? this._subdomain()!.charAt(0).toUpperCase() + this._subdomain()!.slice(1)
-      : 'Platform'
+      : 'Platform',
   );
 
   apiBaseUrl(): string {
     const host = window.location.hostname;
     const port = this.appConfig.apiPort;
     const protocol = window.location.protocol;
+
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return `${protocol}//${host}:${port}`;
+    }
 
     if (host.endsWith('.localhost') || host.includes('infinitejourney.com')) {
       return `${protocol}//${host}:${port}`;

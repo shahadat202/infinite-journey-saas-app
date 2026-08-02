@@ -14,7 +14,7 @@ public sealed class CampaignsController : ApiControllerBase
 {
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<CampaignListItemDto>), StatusCodes.Status200OK)]
-    public Task<IActionResult> GetAll([AsParameters] GetCampaignsQuery query, CancellationToken cancellationToken)
+    public Task<IActionResult> GetAll([FromQuery] GetCampaignsQuery query, CancellationToken cancellationToken)
         => SendAsync(query, cancellationToken);
 
     [HttpGet(ApiRoutes.Campaigns.ById)]
