@@ -6,4 +6,7 @@ namespace InfiniteJourney.Application.Campaigns.Queries;
 
 public sealed record GetCampaignByIdQuery(Guid CampaignId) : IQuery<CampaignDetailDto?>;
 
-public sealed record GetCampaignsQuery(CampaignStatus? Status = null) : IQuery<IReadOnlyList<CampaignListItemDto>>;
+public sealed class GetCampaignsQuery : Common.Models.GridQuery, IQuery<Common.Models.PagedResult<CampaignListItemDto>>
+{
+    public CampaignStatus? Status { get; set; }
+}

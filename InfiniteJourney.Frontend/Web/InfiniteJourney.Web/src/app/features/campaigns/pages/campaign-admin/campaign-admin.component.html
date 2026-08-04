@@ -1,0 +1,73 @@
+<section class="admin">
+  <div class="header-row">
+    <div>
+      <a routerLink="/campaigns" class="back">← Public campaigns</a>
+      <h1>Manage campaigns</h1>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="openCreate()">New campaign</button>
+  </div>
+
+  <app-data-grid
+    title="All campaigns"
+    [columns]="columns"
+    [result]="result()"
+    [loading]="loading()"
+    searchPlaceholder="Search title or description…"
+    (queryChange)="load($event)"
+    (rowAction)="onRowAction($event)"
+  />
+
+  @if (showForm()) {
+    <div class="overlay" (click)="closeForm()"></div>
+    <aside class="panel" (click)="$event.stopPropagation()">
+      <header>
+        <h2>{{ editingId() ? 'Edit campaign' : 'New campaign' }}</h2>
+        <button type="button" class="icon-btn" (click)="closeForm()">×</button>
+      </header>
+
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <label>
+          Title
+          <input formControlName="title" />
+        </label>
+
+        <label>
+          Description
+          <textarea rows="4" formControlName="description"></textarea>
+        </label>
+
+        <label>
+          Target amount
+          <input type="number" formControlName="targetAmount" min="1" />
+        </label>
+
+        <label>
+          Start date
+          <input type="date" formControlName="startDate" />
+        </label>
+
+        <label>
+          End date
+          <input type="date" formControlName="endDate" />
+        </label>
+
+        <div class="upload">
+          <label class="file-label">
+            Cover image
+            <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+          </label>
+          @if (coverPreview()) {
+            <img [src]="coverPreview()!" alt="Cover preview" class="preview" />
+          }
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn" (click)="closeForm()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="saving()">
+            {{ saving() ? 'Saving…' : 'Save' }}
+          </button>
+        </div>
+      </form>
+    </aside>
+  }
+</section>

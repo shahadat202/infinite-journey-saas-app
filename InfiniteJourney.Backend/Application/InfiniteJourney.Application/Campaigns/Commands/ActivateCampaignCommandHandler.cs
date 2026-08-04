@@ -1,6 +1,7 @@
 using InfiniteJourney.Application.Campaigns.Dtos;
 using InfiniteJourney.Application.Campaigns.Mappings;
 using InfiniteJourney.Application.Common.Abstractions;
+using InfiniteJourney.Application.Common.Exceptions;
 using InfiniteJourney.Application.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,7 +20,7 @@ public sealed class ActivateCampaignCommandHandler : ICommandHandler<ActivateCam
     {
         var campaign = await _context.Campaigns
             .FirstOrDefaultAsync(c => c.Id == request.CampaignId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Campaign {request.CampaignId} was not found.");
+            ?? throw new NotFoundException($"Campaign {request.CampaignId} was not found.");
 
         campaign.Activate();
         await _context.SaveChangesAsync(cancellationToken);

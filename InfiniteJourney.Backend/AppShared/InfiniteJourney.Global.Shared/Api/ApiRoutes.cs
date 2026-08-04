@@ -14,6 +14,12 @@ public static class ApiRoutes
         public const string Activate = "{id:guid}/activate";
     }
 
+    public static class Files
+    {
+        public const string Base = $"{ApiRoot}/files";
+        public const string Upload = "upload";
+    }
+
     public static class Health
     {
         public const string Base = "health";

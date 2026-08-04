@@ -6,6 +6,9 @@
   } @else if (error()) {
     <p class="error">{{ error() }}</p>
   } @else if (campaign(); as c) {
+    @if (coverUrl(c)) {
+      <img class="cover" [src]="coverUrl(c)" [alt]="c.title" />
+    }
     <h1>{{ c.title }}</h1>
     <p>{{ c.description }}</p>
     <div class="progress">

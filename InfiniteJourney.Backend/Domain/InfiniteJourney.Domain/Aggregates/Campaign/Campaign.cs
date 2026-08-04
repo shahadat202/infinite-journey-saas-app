@@ -79,6 +79,12 @@ public class Campaign : BaseTenantEntity
         LastModifiedAt = DateTimeOffset.UtcNow;
     }
 
+    public void EnsureCanDelete()
+    {
+        if (RaisedAmount > 0)
+            throw new InvalidOperationException("Cannot delete a campaign that has received donations.");
+    }
+
     public void RecordDonation(Guid donationId, decimal amount, string donorEmail)
     {
         if (Status != CampaignStatus.Active)

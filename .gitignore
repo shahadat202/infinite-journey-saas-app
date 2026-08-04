@@ -339,5 +339,5 @@ ASALocalRun/
 .localhistory/
 
 # BeatPulse healthcheck temp database
-healthchecksdb
+UPLOADED_DATA/
 /Api/VonomeCloudIdentityServer.API/obj/Debug/net7.0/VonomeCloudIdentityServer.API.assets.cache

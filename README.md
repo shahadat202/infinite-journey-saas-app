@@ -49,3 +49,11 @@ npm start
 - [InfiniteJourney.Frontend](InfiniteJourney.Frontend/) — Angular frontend
 - [docs/SETUP.md](docs/SETUP.md) — setup guide
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — architecture overview
+- [docs/PHASE-1-PLATFORM-GUIDE.md](docs/PHASE-1-PLATFORM-GUIDE.md) — Phase 1 features, testing, and roadmap
+
+### Frontend documentation (Compodoc)
+
+```powershell
+cd InfiniteJourney.Frontend/Web/InfiniteJourney.Web
+npm run docs:serve    # http://localhost:8085
+```

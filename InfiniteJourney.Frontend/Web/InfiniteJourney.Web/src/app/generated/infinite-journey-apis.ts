@@ -16,9 +16,11 @@ import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from '@angula
 export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 
 export interface ICampaignsClient {
-    campaigns_GetAll(status: CampaignStatus | null | undefined): Observable<CampaignListItemDto[]>;
+    campaigns_GetAll(status: CampaignStatus | null | undefined, pageIndex: number | undefined, pageSize: number | undefined, search: string | null | undefined, sortBy: string | null | undefined, sortDirection: string | undefined, isDescending: boolean | undefined): Observable<PagedResultOfCampaignListItemDto>;
     campaigns_Create(command: CreateCampaignCommand): Observable<CreateCampaignResultDto>;
     campaigns_GetById(id: string, route: GetCampaignByIdRoute): Observable<CampaignDetailDto>;
+    campaigns_Update(id: string, body: UpdateCampaignRequest): Observable<CampaignDetailDto>;
+    campaigns_Delete(id: string): Observable<void>;
     campaigns_Activate(id: string, route: ActivateCampaignRoute): Observable<CampaignDetailDto>;
 }
 
@@ -35,10 +37,30 @@ export class CampaignsClient implements ICampaignsClient {
         this.baseUrl = baseUrl ?? "";
     }
 
-    campaigns_GetAll(status: CampaignStatus | null | undefined): Observable<CampaignListItemDto[]> {
+    campaigns_GetAll(status: CampaignStatus | null | undefined, pageIndex: number | undefined, pageSize: number | undefined, search: string | null | undefined, sortBy: string | null | undefined, sortDirection: string | undefined, isDescending: boolean | undefined): Observable<PagedResultOfCampaignListItemDto> {
         let url_ = this.baseUrl + "/api/campaigns?";
         if (status !== undefined && status !== null)
             url_ += "Status=" + encodeURIComponent("" + status) + "&";
+        if (pageIndex === null)
+            throw new Error("The parameter 'pageIndex' cannot be null.");
+        else if (pageIndex !== undefined)
+            url_ += "PageIndex=" + encodeURIComponent("" + pageIndex) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (search !== undefined && search !== null)
+            url_ += "Search=" + encodeURIComponent("" + search) + "&";
+        if (sortBy !== undefined && sortBy !== null)
+            url_ += "SortBy=" + encodeURIComponent("" + sortBy) + "&";
+        if (sortDirection === null)
+            throw new Error("The parameter 'sortDirection' cannot be null.");
+        else if (sortDirection !== undefined)
+            url_ += "SortDirection=" + encodeURIComponent("" + sortDirection) + "&";
+        if (isDescending === null)
+            throw new Error("The parameter 'isDescending' cannot be null.");
+        else if (isDescending !== undefined)
+            url_ += "IsDescending=" + encodeURIComponent("" + isDescending) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -56,14 +78,14 @@ export class CampaignsClient implements ICampaignsClient {
                 try {
                     return this.processCampaigns_GetAll(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<CampaignListItemDto[]>;
+                    return _observableThrow(e) as any as Observable<PagedResultOfCampaignListItemDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<CampaignListItemDto[]>;
+                return _observableThrow(response_) as any as Observable<PagedResultOfCampaignListItemDto>;
         }));
     }
 
-    protected processCampaigns_GetAll(response: HttpResponseBase): Observable<CampaignListItemDto[]> {
+    protected processCampaigns_GetAll(response: HttpResponseBase): Observable<PagedResultOfCampaignListItemDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -74,14 +96,7 @@ export class CampaignsClient implements ICampaignsClient {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(CampaignListItemDto.fromJS(item));
-            }
-            else {
-                result200 = <any>null;
-            }
+            result200 = PagedResultOfCampaignListItemDto.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
@@ -206,6 +221,122 @@ export class CampaignsClient implements ICampaignsClient {
         return _observableOf(null as any);
     }
 
+    campaigns_Update(id: string, body: UpdateCampaignRequest): Observable<CampaignDetailDto> {
+        let url_ = this.baseUrl + "/api/campaigns/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCampaigns_Update(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCampaigns_Update(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<CampaignDetailDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<CampaignDetailDto>;
+        }));
+    }
+
+    protected processCampaigns_Update(response: HttpResponseBase): Observable<CampaignDetailDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = CampaignDetailDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    campaigns_Delete(id: string): Observable<void> {
+        let url_ = this.baseUrl + "/api/campaigns/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCampaigns_Delete(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCampaigns_Delete(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processCampaigns_Delete(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
     campaigns_Activate(id: string, route: ActivateCampaignRoute): Observable<CampaignDetailDto> {
         let url_ = this.baseUrl + "/api/campaigns/{id}/activate";
         if (id === undefined || id === null)
@@ -267,6 +398,132 @@ export class CampaignsClient implements ICampaignsClient {
         }
         return _observableOf(null as any);
     }
+}
+
+export interface IFilesClient {
+    files_Upload(command: UploadFileCommand): Observable<UploadFileResultDto>;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class FilesClient implements IFilesClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    files_Upload(command: UploadFileCommand): Observable<UploadFileResultDto> {
+        let url_ = this.baseUrl + "/api/files/upload";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processFiles_Upload(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processFiles_Upload(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<UploadFileResultDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<UploadFileResultDto>;
+        }));
+    }
+
+    protected processFiles_Upload(response: HttpResponseBase): Observable<UploadFileResultDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UploadFileResultDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+export class PagedResultOfCampaignListItemDto implements IPagedResultOfCampaignListItemDto {
+    data?: CampaignListItemDto[];
+    pageIndex?: number;
+    pageSize?: number;
+    total?: number;
+
+    constructor(data?: IPagedResultOfCampaignListItemDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["data"])) {
+                this.data = [] as any;
+                for (let item of _data["data"])
+                    this.data!.push(CampaignListItemDto.fromJS(item));
+            }
+            this.pageIndex = _data["pageIndex"];
+            this.pageSize = _data["pageSize"];
+            this.total = _data["total"];
+        }
+    }
+
+    static fromJS(data: any): PagedResultOfCampaignListItemDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PagedResultOfCampaignListItemDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.data)) {
+            data["data"] = [];
+            for (let item of this.data)
+                data["data"].push(item.toJSON());
+        }
+        data["pageIndex"] = this.pageIndex;
+        data["pageSize"] = this.pageSize;
+        data["total"] = this.total;
+        return data;
+    }
+}
+
+export interface IPagedResultOfCampaignListItemDto {
+    data?: CampaignListItemDto[];
+    pageIndex?: number;
+    pageSize?: number;
+    total?: number;
 }
 
 export class CampaignListItemDto implements ICampaignListItemDto {
@@ -612,6 +869,62 @@ export interface ICreateCampaignCommand {
     endDate?: Date | undefined;
 }
 
+export class UpdateCampaignRequest implements IUpdateCampaignRequest {
+    title?: string;
+    description?: string;
+    targetAmount?: number;
+    coverImageUrl?: string | undefined;
+    startDate?: Date | undefined;
+    endDate?: Date | undefined;
+
+    constructor(data?: IUpdateCampaignRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.title = _data["title"];
+            this.description = _data["description"];
+            this.targetAmount = _data["targetAmount"];
+            this.coverImageUrl = _data["coverImageUrl"];
+            this.startDate = _data["startDate"] ? new Date(_data["startDate"].toString()) : <any>undefined;
+            this.endDate = _data["endDate"] ? new Date(_data["endDate"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): UpdateCampaignRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateCampaignRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["title"] = this.title;
+        data["description"] = this.description;
+        data["targetAmount"] = this.targetAmount;
+        data["coverImageUrl"] = this.coverImageUrl;
+        data["startDate"] = this.startDate ? this.startDate.toISOString() : <any>undefined;
+        data["endDate"] = this.endDate ? this.endDate.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IUpdateCampaignRequest {
+    title?: string;
+    description?: string;
+    targetAmount?: number;
+    coverImageUrl?: string | undefined;
+    startDate?: Date | undefined;
+    endDate?: Date | undefined;
+}
+
 export class ActivateCampaignRoute implements IActivateCampaignRoute {
     id?: string;
 
@@ -646,6 +959,108 @@ export class ActivateCampaignRoute implements IActivateCampaignRoute {
 
 export interface IActivateCampaignRoute {
     id?: string;
+}
+
+export class UploadFileResultDto implements IUploadFileResultDto {
+    path?: string;
+    fileName?: string;
+    contentType?: string;
+    sizeBytes?: number;
+
+    constructor(data?: IUploadFileResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.path = _data["path"];
+            this.fileName = _data["fileName"];
+            this.contentType = _data["contentType"];
+            this.sizeBytes = _data["sizeBytes"];
+        }
+    }
+
+    static fromJS(data: any): UploadFileResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UploadFileResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["path"] = this.path;
+        data["fileName"] = this.fileName;
+        data["contentType"] = this.contentType;
+        data["sizeBytes"] = this.sizeBytes;
+        return data;
+    }
+}
+
+export interface IUploadFileResultDto {
+    path?: string;
+    fileName?: string;
+    contentType?: string;
+    sizeBytes?: number;
+}
+
+export class UploadFileCommand implements IUploadFileCommand {
+    fileName?: string;
+    contentType?: string;
+    base64Data?: string;
+    category?: FileCategory;
+
+    constructor(data?: IUploadFileCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.fileName = _data["fileName"];
+            this.contentType = _data["contentType"];
+            this.base64Data = _data["base64Data"];
+            this.category = _data["category"];
+        }
+    }
+
+    static fromJS(data: any): UploadFileCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new UploadFileCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["fileName"] = this.fileName;
+        data["contentType"] = this.contentType;
+        data["base64Data"] = this.base64Data;
+        data["category"] = this.category;
+        return data;
+    }
+}
+
+export interface IUploadFileCommand {
+    fileName?: string;
+    contentType?: string;
+    base64Data?: string;
+    category?: FileCategory;
+}
+
+export enum FileCategory {
+    Images = 0,
+    Pdfs = 1,
+    Documents = 2,
 }
 
 export class SwaggerException extends Error {

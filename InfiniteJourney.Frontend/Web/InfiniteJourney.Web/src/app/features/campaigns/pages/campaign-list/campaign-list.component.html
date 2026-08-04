@@ -9,6 +9,9 @@
     <div class="grid">
       @for (campaign of campaigns(); track campaign.id) {
         <article class="card">
+          @if (coverUrl(campaign)) {
+            <img class="cover" [src]="coverUrl(campaign)" [alt]="campaign.title" />
+          }
           <h2>
             <a [routerLink]="['/campaigns', campaign.id]">{{ campaign.title }}</a>
           </h2>

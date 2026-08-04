@@ -2,6 +2,7 @@ using InfiniteJourney.Application.Campaigns.Dtos;
 using InfiniteJourney.Application.Common.Abstractions;
 using InfiniteJourney.Application.Common.Interfaces;
 using InfiniteJourney.Domain.Aggregates.Campaign;
+using FluentValidation;
 
 namespace InfiniteJourney.Application.Campaigns.Commands;
 
@@ -34,5 +35,29 @@ public sealed class CreateCampaignCommandHandler : ICommandHandler<CreateCampaig
         await _context.SaveChangesAsync(cancellationToken);
 
         return new CreateCampaignResultDto(campaign.Id);
+    }
+}
+
+public sealed class CreateCampaignCommandValidator : AbstractValidator<CreateCampaignCommand>
+{
+    public CreateCampaignCommandValidator()
+    {
+        RuleFor(x => x.Title)
+            .NotEmpty()
+            .MaximumLength(255);
+
+        RuleFor(x => x.Description)
+            .MaximumLength(4000);
+
+        RuleFor(x => x.TargetAmount)
+            .GreaterThan(0);
+
+        RuleFor(x => x.CoverImageUrl)
+            .MaximumLength(500)
+            .When(x => x.CoverImageUrl is not null);
+
+        RuleFor(x => x.EndDate)
+            .GreaterThan(x => x.StartDate)
+            .When(x => x.StartDate.HasValue && x.EndDate.HasValue);
     }
 }

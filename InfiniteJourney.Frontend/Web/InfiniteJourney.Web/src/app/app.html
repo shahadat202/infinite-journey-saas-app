@@ -7,6 +7,7 @@
     <nav>
       <a routerLink="/campaigns">Campaigns</a>
       @if (auth.authenticated) {
+        <a routerLink="/campaigns/manage">Manage</a>
         <span class="user">{{ auth.userName }}</span>
         <button type="button" class="btn" (click)="auth.logout()">Logout</button>
       } @else {
@@ -18,4 +19,6 @@
   <main class="main">
     <router-outlet />
   </main>
+
+  <app-toast-container />
 </div>

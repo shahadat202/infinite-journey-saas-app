@@ -1,0 +1,78 @@
+<section class="data-grid">
+  <div class="toolbar">
+    @if (title()) {
+      <h2>{{ title() }}</h2>
+    }
+    <div class="search">
+      <input
+        type="search"
+        [(ngModel)]="search"
+        [placeholder]="searchPlaceholder()"
+        (keyup.enter)="onSearch()"
+      />
+      <button type="button" class="btn" (click)="onSearch()">Search</button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="muted">Loading…</p>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            @for (col of columns(); track col.key) {
+              <th [class.sortable]="col.sortable" (click)="onSort(col)">
+                {{ col.label }}{{ sortIndicator(col) }}
+              </th>
+            }
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of result().data; track $index) {
+            <tr>
+              @for (col of columns(); track col.key) {
+                <td>{{ cellValue(row, col) }}</td>
+              }
+              <td class="actions">
+                <button type="button" class="link" (click)="rowAction.emit({ action: 'edit', row })">
+                  Edit
+                </button>
+                <button type="button" class="link" (click)="rowAction.emit({ action: 'activate', row })">
+                  Activate
+                </button>
+                <button type="button" class="link danger" (click)="rowAction.emit({ action: 'delete', row })">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td [attr.colspan]="columns().length + 1" class="empty">No records found.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pager">
+      <span>
+        Page {{ result().pageIndex + 1 }} of {{ totalPages() }} · {{ result().total | number }} total
+      </span>
+      <div class="pager-btns">
+        <button type="button" class="btn" [disabled]="result().pageIndex === 0" (click)="goToPage(result().pageIndex - 1)">
+          Previous
+        </button>
+        <button
+          type="button"
+          class="btn"
+          [disabled]="result().pageIndex + 1 >= totalPages()"
+          (click)="goToPage(result().pageIndex + 1)"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  }
+</section>

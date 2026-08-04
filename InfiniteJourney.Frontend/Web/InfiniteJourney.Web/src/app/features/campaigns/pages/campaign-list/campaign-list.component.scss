@@ -11,6 +11,14 @@
   padding: 1.25rem;
 }
 
+.cover {
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  max-height: 180px;
+  object-fit: cover;
+  width: 100%;
+}
+
 .progress {
   background: var(--border);
   border-radius: 999px;

@@ -1,11 +1,8 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import {
-  CampaignsClient,
-  CampaignListItemDto,
-  CampaignStatus,
-} from '@generated/infinite-journey-apis';
+import { CampaignListItem } from '@core/models/campaign.model';
+import { CampaignApiService } from '@core/services/campaign-api.service';
 
 @Component({
   selector: 'app-campaign-list',
@@ -14,28 +11,34 @@ import {
   styleUrl: './campaign-list.component.scss',
 })
 export class CampaignListComponent implements OnInit {
-  private readonly campaignsClient = inject(CampaignsClient);
+  private readonly api = inject(CampaignApiService);
 
-  protected readonly campaigns = signal<CampaignListItemDto[]>([]);
+  protected readonly campaigns = signal<CampaignListItem[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
 
   ngOnInit(): void {
-    this.campaignsClient.campaigns_GetAll(CampaignStatus.Active).subscribe({
-      next: (items) => {
-        this.campaigns.set(items);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set('Unable to load campaigns. Is the API running on port 5274?');
-        this.loading.set(false);
-      },
-    });
+    this.api
+      .getPaged({ pageIndex: 0, pageSize: 50, sortBy: 'createdat', sortDirection: 'desc', status: 'Active' })
+      .subscribe({
+        next: (page) => {
+          this.campaigns.set(page.data);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.error.set('Unable to load campaigns. Is the API running on port 5274?');
+          this.loading.set(false);
+        },
+      });
   }
 
-  progress(item: CampaignListItemDto): number {
+  progress(item: CampaignListItem): number {
     return item.targetAmount && item.targetAmount > 0
       ? Math.round(((item.raisedAmount || 0) / item.targetAmount) * 100)
       : 0;
+  }
+
+  coverUrl(item: CampaignListItem): string {
+    return this.api.resolveMediaUrl(item.coverImageUrl);
   }
 }

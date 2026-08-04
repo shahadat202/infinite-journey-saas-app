@@ -4,6 +4,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { routes } from './app.routes';
 import { authInterceptor } from '@core/interceptors/auth.interceptor';
+import { errorInterceptor } from '@core/interceptors/error.interceptor';
 import { AuthService } from '@core/services/auth.service';
 import { AppConfigService } from '@core/config/app-config.service';
 import { TenantContextService } from '@core/services/tenant-context.service';
@@ -20,7 +21,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     {
       provide: API_BASE_URL,
       useFactory: (tenantService: TenantContextService) => tenantService.apiBaseUrl(),

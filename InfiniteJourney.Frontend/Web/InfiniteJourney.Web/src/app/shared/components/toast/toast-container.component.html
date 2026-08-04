@@ -1,0 +1,7 @@
+<div class="toast-stack" aria-live="polite">
+  @for (item of toast.messages(); track item.id) {
+    <div class="toast toast--{{ item.type }}" (click)="toast.dismiss(item.id)">
+      {{ item.text }}
+    </div>
+  }
+</div>

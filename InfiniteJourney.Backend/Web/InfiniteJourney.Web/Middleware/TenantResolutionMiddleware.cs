@@ -27,7 +27,8 @@ public sealed class TenantResolutionMiddleware
         var path = context.Request.Path.Value ?? string.Empty;
 
         if (_excludedPaths.Contains(NormalizePath(path)) ||
-            path.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase))
+            path.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase) ||
+            path.StartsWith("/uploads", StringComparison.OrdinalIgnoreCase))
         {
             await _next(context);
             return;
