@@ -28,12 +28,20 @@ npm install
 npm start
 ```
 
+### Frontend documentation (Compodoc)
+
+```powershell
+cd InfiniteJourney.Frontend/Web/InfiniteJourney.Web
+npm run docs:serve    # http://localhost:8085
+```
+
 ### Open the app
 
-- Frontend: http://hope.localhost:4200
-- Backend API: http://hope.localhost:5274/api/campaigns
-- Swagger: http://localhost:5274/swagger
 - Keycloak admin: http://localhost:8080
+- Swagger: http://localhost:5274/swagger
+- Backend API: http://hope.localhost:5274/api/campaigns
+- Frontend: http://hope.localhost:4200
+- Frontend Documentation: http://localhost:8085
 
 ### Default test account
 
@@ -50,10 +58,3 @@ npm start
 - [docs/SETUP.md](docs/SETUP.md) — setup guide
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — architecture overview
 - [docs/PHASE-1-PLATFORM-GUIDE.md](docs/PHASE-1-PLATFORM-GUIDE.md) — Phase 1 features, testing, and roadmap
-
-### Frontend documentation (Compodoc)
-
-```powershell
-cd InfiniteJourney.Frontend/Web/InfiniteJourney.Web
-npm run docs:serve    # http://localhost:8085
-```
