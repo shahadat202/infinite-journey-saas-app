@@ -1,6 +1,5 @@
 using FluentValidation;
-using InfiniteJourney.Application.Campaigns.Dtos;
-using InfiniteJourney.Application.Campaigns.Mappings;
+using InfiniteJourney.Application.Campaigns;
 using InfiniteJourney.Application.Common.Abstractions;
 using InfiniteJourney.Application.Common.Exceptions;
 using InfiniteJourney.Application.Common.Interfaces;
@@ -17,7 +16,9 @@ public sealed class UpdateCampaignCommandHandler : ICommandHandler<UpdateCampaig
         _context = context;
     }
 
-    public async Task<CampaignDetailDto> Handle(UpdateCampaignCommand request, CancellationToken cancellationToken)
+    public async Task<CampaignDetailDto> Handle(
+        UpdateCampaignCommand request,
+        CancellationToken cancellationToken)
     {
         var campaign = await _context.Campaigns
             .FirstOrDefaultAsync(c => c.Id == request.CampaignId, cancellationToken)
@@ -40,6 +41,8 @@ public sealed class UpdateCampaignCommandValidator : AbstractValidator<UpdateCam
 {
     public UpdateCampaignCommandValidator()
     {
+        // CampaignId is assigned from the route by the controller — always valid
+        // by the time the command reaches this validator.
         RuleFor(x => x.CampaignId).NotEmpty();
         RuleFor(x => x.Title).NotEmpty().MaximumLength(255);
         RuleFor(x => x.Description).MaximumLength(4000);

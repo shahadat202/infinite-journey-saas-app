@@ -1,5 +1,4 @@
-using InfiniteJourney.Application.Campaigns.Dtos;
-using InfiniteJourney.Application.Campaigns.Mappings;
+using InfiniteJourney.Application.Campaigns;
 using InfiniteJourney.Application.Common.Abstractions;
 using InfiniteJourney.Application.Common.Exceptions;
 using InfiniteJourney.Application.Common.Interfaces;
@@ -16,7 +15,9 @@ public sealed class ActivateCampaignCommandHandler : ICommandHandler<ActivateCam
         _context = context;
     }
 
-    public async Task<CampaignDetailDto> Handle(ActivateCampaignCommand request, CancellationToken cancellationToken)
+    public async Task<CampaignDetailDto> Handle(
+        ActivateCampaignCommand request,
+        CancellationToken cancellationToken)
     {
         var campaign = await _context.Campaigns
             .FirstOrDefaultAsync(c => c.Id == request.CampaignId, cancellationToken)

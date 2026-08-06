@@ -6,6 +6,14 @@ namespace InfiniteJourney.Application.Common.Extensions;
 
 public static class QueryableGridExtensions
 {
+    // -------------------------------------------------------------------------
+    // Pagination
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Executes a count + paged fetch and returns <see cref="PagedResult{T}"/>.
+    /// Use when the EF projection type and the DTO type are the same.
+    /// </summary>
     public static async Task<PagedResult<T>> ToPagedResultAsync<T>(
         this IQueryable<T> query,
         GridQuery grid,
@@ -19,15 +27,43 @@ public static class QueryableGridExtensions
             .Take(grid.PageSize)
             .ToListAsync(cancellationToken);
 
-        return new PagedResult<T>
-        {
-            Data = data,
-            PageIndex = grid.PageIndex,
-            PageSize = grid.PageSize,
-            Total = total
-        };
+        return PagedResult<T>.Create(data, total, grid);
     }
 
+    /// <summary>
+    /// Executes a count + paged fetch, then projects each entity to a DTO in a
+    /// single database round-trip. Eliminates the double-pass pattern where callers
+    /// would call <see cref="ToPagedResultAsync{T}"/> and immediately call
+    /// <c>paged.Map(...)</c> afterwards.
+    /// </summary>
+    public static async Task<PagedResult<TDto>> ToPagedResultAsync<TSource, TDto>(
+        this IQueryable<TSource> query,
+        GridQuery grid,
+        Func<TSource, TDto> selector,
+        CancellationToken cancellationToken = default)
+        where TSource : class
+    {
+        var total = await query.CountAsync(cancellationToken);
+
+        var data = await query
+            .Skip(grid.PageIndex * grid.PageSize)
+            .Take(grid.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return PagedResult<TDto>.Create(
+            data.Select(selector).ToList(),
+            total,
+            grid);
+    }
+
+    // -------------------------------------------------------------------------
+    // Search
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Applies a case-insensitive OR search across all provided string fields.
+    /// No-ops when <paramref name="search"/> is null or whitespace.
+    /// </summary>
     public static IQueryable<T> ApplySearch<T>(
         this IQueryable<T> query,
         string? search,
@@ -42,7 +78,9 @@ public static class QueryableGridExtensions
 
         foreach (var field in searchableFields)
         {
-            var body = new ReplaceParameterVisitor(field.Parameters[0], parameter).Visit(field.Body)!;
+            var body = new ReplaceParameterVisitor(field.Parameters[0], parameter)
+                .Visit(field.Body)!;
+
             var toLower = Expression.Call(body, nameof(string.ToLower), Type.EmptyTypes);
             var contains = Expression.Call(
                 toLower,
@@ -50,13 +88,23 @@ public static class QueryableGridExtensions
                 Type.EmptyTypes,
                 Expression.Constant(term));
 
-            combined = combined is null ? contains : Expression.OrElse(combined, contains);
+            combined = combined is null
+                ? contains
+                : Expression.OrElse(combined, contains);
         }
 
-        var lambda = Expression.Lambda<Func<T, bool>>(combined!, parameter);
-        return query.Where(lambda);
+        return query.Where(Expression.Lambda<Func<T, bool>>(combined!, parameter));
     }
 
+    // -------------------------------------------------------------------------
+    // Sorting
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Applies a sort from the <see cref="GridQuery.SortBy"/> field against a
+    /// caller-supplied map of column-name → expression. Falls back to
+    /// <paramref name="defaultSort"/> when the field is absent or unrecognised.
+    /// </summary>
     public static IQueryable<T> ApplySort<T>(
         this IQueryable<T> query,
         GridQuery grid,
@@ -64,17 +112,22 @@ public static class QueryableGridExtensions
         Expression<Func<T, object>> defaultSort)
     {
         var key = grid.SortBy?.Trim().ToLowerInvariant();
-        var sortExpr = key is not null && sortMap.TryGetValue(key, out var mapped)
+        var expr = key is not null && sortMap.TryGetValue(key, out var mapped)
             ? mapped
             : defaultSort;
 
         return grid.IsDescending
-            ? query.OrderByDescending(sortExpr)
-            : query.OrderBy(sortExpr);
+            ? query.OrderByDescending(expr)
+            : query.OrderBy(expr);
     }
 
-    private sealed class ReplaceParameterVisitor(ParameterExpression oldParam, ParameterExpression newParam)
-        : ExpressionVisitor
+    // -------------------------------------------------------------------------
+    // Internal helpers
+    // -------------------------------------------------------------------------
+
+    private sealed class ReplaceParameterVisitor(
+        ParameterExpression oldParam,
+        ParameterExpression newParam) : ExpressionVisitor
     {
         protected override Expression VisitParameter(ParameterExpression node)
             => node == oldParam ? newParam : base.VisitParameter(node)!;

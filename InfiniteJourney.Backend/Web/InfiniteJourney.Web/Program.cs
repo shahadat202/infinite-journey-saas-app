@@ -13,7 +13,15 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Serialize all enums as their string names (e.g. "Active" not 1).
+        // This keeps the API contract human-readable and avoids frontend
+        // guessing integer values when enum members are reordered.
+        options.JsonSerializerOptions.Converters.Add(
+            new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 builder.Services.AddOpenApiDocument(config =>
 {
     config.Title = "InfiniteJourney API";

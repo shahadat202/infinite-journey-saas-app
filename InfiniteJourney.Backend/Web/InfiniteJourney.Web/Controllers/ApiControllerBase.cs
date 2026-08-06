@@ -6,7 +6,7 @@ namespace InfiniteJourney.Web.Controllers;
 [ApiController]
 public abstract class ApiControllerBase : ControllerBase
 {
-    private ISender Mediator => HttpContext.RequestServices.GetRequiredService<ISender>();
+    protected ISender Mediator => HttpContext.RequestServices.GetRequiredService<ISender>();
 
     protected Task<IActionResult> SendAsync<TResponse>(
         IRequest<TResponse> request,

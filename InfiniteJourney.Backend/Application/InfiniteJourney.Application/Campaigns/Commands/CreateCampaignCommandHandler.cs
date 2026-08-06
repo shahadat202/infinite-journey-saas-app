@@ -1,8 +1,8 @@
-using InfiniteJourney.Application.Campaigns.Dtos;
+using FluentValidation;
+using InfiniteJourney.Application.Campaigns;
 using InfiniteJourney.Application.Common.Abstractions;
 using InfiniteJourney.Application.Common.Interfaces;
 using InfiniteJourney.Domain.Aggregates.Campaign;
-using FluentValidation;
 
 namespace InfiniteJourney.Application.Campaigns.Commands;
 
@@ -17,7 +17,9 @@ public sealed class CreateCampaignCommandHandler : ICommandHandler<CreateCampaig
         _tenantContext = tenantContext;
     }
 
-    public async Task<CreateCampaignResultDto> Handle(CreateCampaignCommand request, CancellationToken cancellationToken)
+    public async Task<CreateCampaignResultDto> Handle(
+        CreateCampaignCommand request,
+        CancellationToken cancellationToken)
     {
         if (!_tenantContext.IsResolved)
             throw new InvalidOperationException("Tenant context is not resolved.");

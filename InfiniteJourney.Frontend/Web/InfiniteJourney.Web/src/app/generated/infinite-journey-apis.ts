@@ -18,10 +18,10 @@ export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 export interface ICampaignsClient {
     campaigns_GetAll(status: CampaignStatus | null | undefined, pageIndex: number | undefined, pageSize: number | undefined, search: string | null | undefined, sortBy: string | null | undefined, sortDirection: string | undefined, isDescending: boolean | undefined): Observable<PagedResultOfCampaignListItemDto>;
     campaigns_Create(command: CreateCampaignCommand): Observable<CreateCampaignResultDto>;
-    campaigns_GetById(id: string, route: GetCampaignByIdRoute): Observable<CampaignDetailDto>;
-    campaigns_Update(id: string, body: UpdateCampaignRequest): Observable<CampaignDetailDto>;
+    campaigns_GetById(id: string): Observable<CampaignDetailDto>;
+    campaigns_Update(id: string, command: UpdateCampaignCommand): Observable<CampaignDetailDto>;
     campaigns_Delete(id: string): Observable<void>;
-    campaigns_Activate(id: string, route: ActivateCampaignRoute): Observable<CampaignDetailDto>;
+    campaigns_Activate(id: string): Observable<CampaignDetailDto>;
 }
 
 @Injectable({
@@ -159,21 +159,17 @@ export class CampaignsClient implements ICampaignsClient {
         return _observableOf(null as any);
     }
 
-    campaigns_GetById(id: string, route: GetCampaignByIdRoute): Observable<CampaignDetailDto> {
+    campaigns_GetById(id: string): Observable<CampaignDetailDto> {
         let url_ = this.baseUrl + "/api/campaigns/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(route);
-
         let options_ : any = {
-            body: content_,
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
-                "Content-Type": "application/json",
                 "Accept": "application/json"
             })
         };
@@ -221,14 +217,14 @@ export class CampaignsClient implements ICampaignsClient {
         return _observableOf(null as any);
     }
 
-    campaigns_Update(id: string, body: UpdateCampaignRequest): Observable<CampaignDetailDto> {
+    campaigns_Update(id: string, command: UpdateCampaignCommand): Observable<CampaignDetailDto> {
         let url_ = this.baseUrl + "/api/campaigns/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(body);
+        const content_ = JSON.stringify(command);
 
         let options_ : any = {
             body: content_,
@@ -329,6 +325,13 @@ export class CampaignsClient implements ICampaignsClient {
             result404 = ProblemDetails.fromJS(resultData404);
             return throwException("A server side error occurred.", status, _responseText, _headers, result404);
             }));
+        } else if (status === 409) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result409: any = null;
+            let resultData409 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result409 = ProblemDetails.fromJS(resultData409);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result409);
+            }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -337,21 +340,17 @@ export class CampaignsClient implements ICampaignsClient {
         return _observableOf(null as any);
     }
 
-    campaigns_Activate(id: string, route: ActivateCampaignRoute): Observable<CampaignDetailDto> {
+    campaigns_Activate(id: string): Observable<CampaignDetailDto> {
         let url_ = this.baseUrl + "/api/campaigns/{id}/activate";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(route);
-
         let options_ : any = {
-            body: content_,
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
-                "Content-Type": "application/json",
                 "Accept": "application/json"
             })
         };
@@ -471,10 +470,11 @@ export class FilesClient implements IFilesClient {
 }
 
 export class PagedResultOfCampaignListItemDto implements IPagedResultOfCampaignListItemDto {
-    data?: CampaignListItemDto[];
     pageIndex?: number;
     pageSize?: number;
     total?: number;
+    totalPages?: number;
+    data?: CampaignListItemDto[];
 
     constructor(data?: IPagedResultOfCampaignListItemDto) {
         if (data) {
@@ -487,14 +487,15 @@ export class PagedResultOfCampaignListItemDto implements IPagedResultOfCampaignL
 
     init(_data?: any) {
         if (_data) {
+            this.pageIndex = _data["pageIndex"];
+            this.pageSize = _data["pageSize"];
+            this.total = _data["total"];
+            this.totalPages = _data["totalPages"];
             if (Array.isArray(_data["data"])) {
                 this.data = [] as any;
                 for (let item of _data["data"])
                     this.data!.push(CampaignListItemDto.fromJS(item));
             }
-            this.pageIndex = _data["pageIndex"];
-            this.pageSize = _data["pageSize"];
-            this.total = _data["total"];
         }
     }
 
@@ -507,23 +508,25 @@ export class PagedResultOfCampaignListItemDto implements IPagedResultOfCampaignL
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
+        data["pageIndex"] = this.pageIndex;
+        data["pageSize"] = this.pageSize;
+        data["total"] = this.total;
+        data["totalPages"] = this.totalPages;
         if (Array.isArray(this.data)) {
             data["data"] = [];
             for (let item of this.data)
                 data["data"].push(item.toJSON());
         }
-        data["pageIndex"] = this.pageIndex;
-        data["pageSize"] = this.pageSize;
-        data["total"] = this.total;
         return data;
     }
 }
 
 export interface IPagedResultOfCampaignListItemDto {
-    data?: CampaignListItemDto[];
     pageIndex?: number;
     pageSize?: number;
     total?: number;
+    totalPages?: number;
+    data?: CampaignListItemDto[];
 }
 
 export class CampaignListItemDto implements ICampaignListItemDto {
@@ -595,10 +598,10 @@ export interface ICampaignListItemDto {
 }
 
 export enum CampaignStatus {
-    Draft = 0,
-    Active = 1,
-    Suspended = 2,
-    Ended = 3,
+    Draft = "Draft",
+    Active = "Active",
+    Suspended = "Suspended",
+    Ended = "Ended",
 }
 
 export class CampaignDetailDto implements ICampaignDetailDto {
@@ -741,42 +744,6 @@ export interface IProblemDetails {
     [key: string]: any;
 }
 
-export class GetCampaignByIdRoute implements IGetCampaignByIdRoute {
-    id?: string;
-
-    constructor(data?: IGetCampaignByIdRoute) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"];
-        }
-    }
-
-    static fromJS(data: any): GetCampaignByIdRoute {
-        data = typeof data === 'object' ? data : {};
-        let result = new GetCampaignByIdRoute();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
-        return data;
-    }
-}
-
-export interface IGetCampaignByIdRoute {
-    id?: string;
-}
-
 export class CreateCampaignResultDto implements ICreateCampaignResultDto {
     id?: string;
 
@@ -869,15 +836,16 @@ export interface ICreateCampaignCommand {
     endDate?: Date | undefined;
 }
 
-export class UpdateCampaignRequest implements IUpdateCampaignRequest {
+export class UpdateCampaignCommand implements IUpdateCampaignCommand {
     title?: string;
     description?: string;
     targetAmount?: number;
     coverImageUrl?: string | undefined;
     startDate?: Date | undefined;
     endDate?: Date | undefined;
+    campaignId?: string;
 
-    constructor(data?: IUpdateCampaignRequest) {
+    constructor(data?: IUpdateCampaignCommand) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -894,12 +862,13 @@ export class UpdateCampaignRequest implements IUpdateCampaignRequest {
             this.coverImageUrl = _data["coverImageUrl"];
             this.startDate = _data["startDate"] ? new Date(_data["startDate"].toString()) : <any>undefined;
             this.endDate = _data["endDate"] ? new Date(_data["endDate"].toString()) : <any>undefined;
+            this.campaignId = _data["campaignId"];
         }
     }
 
-    static fromJS(data: any): UpdateCampaignRequest {
+    static fromJS(data: any): UpdateCampaignCommand {
         data = typeof data === 'object' ? data : {};
-        let result = new UpdateCampaignRequest();
+        let result = new UpdateCampaignCommand();
         result.init(data);
         return result;
     }
@@ -912,53 +881,19 @@ export class UpdateCampaignRequest implements IUpdateCampaignRequest {
         data["coverImageUrl"] = this.coverImageUrl;
         data["startDate"] = this.startDate ? this.startDate.toISOString() : <any>undefined;
         data["endDate"] = this.endDate ? this.endDate.toISOString() : <any>undefined;
+        data["campaignId"] = this.campaignId;
         return data;
     }
 }
 
-export interface IUpdateCampaignRequest {
+export interface IUpdateCampaignCommand {
     title?: string;
     description?: string;
     targetAmount?: number;
     coverImageUrl?: string | undefined;
     startDate?: Date | undefined;
     endDate?: Date | undefined;
-}
-
-export class ActivateCampaignRoute implements IActivateCampaignRoute {
-    id?: string;
-
-    constructor(data?: IActivateCampaignRoute) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"];
-        }
-    }
-
-    static fromJS(data: any): ActivateCampaignRoute {
-        data = typeof data === 'object' ? data : {};
-        let result = new ActivateCampaignRoute();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
-        return data;
-    }
-}
-
-export interface IActivateCampaignRoute {
-    id?: string;
+    campaignId?: string;
 }
 
 export class UploadFileResultDto implements IUploadFileResultDto {
@@ -1058,9 +993,9 @@ export interface IUploadFileCommand {
 }
 
 export enum FileCategory {
-    Images = 0,
-    Pdfs = 1,
-    Documents = 2,
+    Images = "Images",
+    Pdfs = "Pdfs",
+    Documents = "Documents",
 }
 
 export class SwaggerException extends Error {

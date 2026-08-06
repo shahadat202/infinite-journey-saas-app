@@ -1,4 +1,4 @@
-using InfiniteJourney.Application.Campaigns.Dtos;
+using InfiniteJourney.Application.Campaigns;
 using InfiniteJourney.Application.Common.Abstractions;
 using InfiniteJourney.Global.Shared.Enums;
 

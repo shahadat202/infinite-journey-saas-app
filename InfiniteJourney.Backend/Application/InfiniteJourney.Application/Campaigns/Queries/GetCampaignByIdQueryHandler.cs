@@ -1,5 +1,4 @@
-using InfiniteJourney.Application.Campaigns.Dtos;
-using InfiniteJourney.Application.Campaigns.Mappings;
+using InfiniteJourney.Application.Campaigns;
 using InfiniteJourney.Application.Common.Abstractions;
 using InfiniteJourney.Application.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +14,9 @@ public sealed class GetCampaignByIdQueryHandler : IQueryHandler<GetCampaignByIdQ
         _context = context;
     }
 
-    public async Task<CampaignDetailDto?> Handle(GetCampaignByIdQuery request, CancellationToken cancellationToken)
+    public async Task<CampaignDetailDto?> Handle(
+        GetCampaignByIdQuery request,
+        CancellationToken cancellationToken)
     {
         var campaign = await _context.Campaigns
             .AsNoTracking()
