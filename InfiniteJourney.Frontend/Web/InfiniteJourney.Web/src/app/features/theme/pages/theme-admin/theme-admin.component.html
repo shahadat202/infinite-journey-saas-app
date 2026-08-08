@@ -1,0 +1,66 @@
+<div class="theme-admin-container">
+  <nz-card nzTitle="Theme Settings" [nzBordered]="false" class="theme-card">
+    <form nz-form [formGroup]="form" (ngSubmit)="save()" nzLayout="vertical">
+      
+      <!-- Primary Color -->
+      <nz-form-item>
+        <nz-form-label nzRequired>Primary Color</nz-form-label>
+        <nz-form-control nzErrorTip="Please enter a valid hex color code (e.g. #1e3a8a)">
+          <div class="color-picker-group">
+            <input type="color" class="color-input" [value]="form.value.primaryColor" (input)="form.patchValue({ primaryColor: $any($event.target).value })" />
+            <input nz-input formControlName="primaryColor" placeholder="#1e3a8a" class="color-text-input" />
+          </div>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Secondary Color -->
+      <nz-form-item>
+        <nz-form-label nzRequired>Secondary Color</nz-form-label>
+        <nz-form-control nzErrorTip="Please enter a valid hex color code (e.g. #10b981)">
+          <div class="color-picker-group">
+            <input type="color" class="color-input" [value]="form.value.secondaryColor" (input)="form.patchValue({ secondaryColor: $any($event.target).value })" />
+            <input nz-input formControlName="secondaryColor" placeholder="#10b981" class="color-text-input" />
+          </div>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Accent Color -->
+      <nz-form-item>
+        <nz-form-label nzRequired>Accent Color</nz-form-label>
+        <nz-form-control nzErrorTip="Please enter a valid hex color code (e.g. #F59E0B)">
+          <div class="color-picker-group">
+            <input type="color" class="color-input" [value]="form.value.accentColor" (input)="form.patchValue({ accentColor: $any($event.target).value })" />
+            <input nz-input formControlName="accentColor" placeholder="#F59E0B" class="color-text-input" />
+          </div>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Font Family -->
+      <nz-form-item>
+        <nz-form-label nzRequired>Font Family</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="fontFamily">
+            @for (font of fontFamilies; track font.value) {
+              <nz-option [nzValue]="font.value" [nzLabel]="font.label"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Dark Mode -->
+      <nz-form-item>
+        <nz-form-label>Enable Dark Mode</nz-form-label>
+        <nz-form-control>
+          <nz-switch formControlName="isDarkMode"></nz-switch>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button nz-button nzType="default" type="button" routerLink="/campaigns/manage">Cancel</button>
+        <button nz-button nzType="primary" type="submit" [nzLoading]="saving()">Save Changes</button>
+      </div>
+
+    </form>
+  </nz-card>
+</div>

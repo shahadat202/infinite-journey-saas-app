@@ -50,3 +50,9 @@ public sealed record DeleteCampaignCommand(Guid CampaignId) : ICommand<bool>;
 // ---------------------------------------------------------------------------
 
 public sealed record ActivateCampaignCommand(Guid CampaignId) : ICommand<CampaignDetailDto>;
+
+// ---------------------------------------------------------------------------
+// Deactivate
+// ---------------------------------------------------------------------------
+
+public sealed record DeactivateCampaignCommand(Guid CampaignId) : ICommand<CampaignDetailDto>;

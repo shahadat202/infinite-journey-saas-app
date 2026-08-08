@@ -22,6 +22,7 @@ export interface ICampaignsClient {
     campaigns_Update(id: string, command: UpdateCampaignCommand): Observable<CampaignDetailDto>;
     campaigns_Delete(id: string): Observable<void>;
     campaigns_Activate(id: string): Observable<CampaignDetailDto>;
+    campaigns_Deactivate(id: string): Observable<CampaignDetailDto>;
 }
 
 @Injectable({
@@ -397,6 +398,64 @@ export class CampaignsClient implements ICampaignsClient {
         }
         return _observableOf(null as any);
     }
+
+    campaigns_Deactivate(id: string): Observable<CampaignDetailDto> {
+        let url_ = this.baseUrl + "/api/campaigns/{id}/deactivate";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCampaigns_Deactivate(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCampaigns_Deactivate(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<CampaignDetailDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<CampaignDetailDto>;
+        }));
+    }
+
+    protected processCampaigns_Deactivate(response: HttpResponseBase): Observable<CampaignDetailDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = CampaignDetailDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
 }
 
 export interface IFilesClient {
@@ -459,6 +518,139 @@ export class FilesClient implements IFilesClient {
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result200 = UploadFileResultDto.fromJS(resultData200);
             return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+export interface IThemeClient {
+    theme_Get(): Observable<ThemeDto>;
+    theme_Update(command: UpdateThemeCommand): Observable<ThemeDto>;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class ThemeClient implements IThemeClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    theme_Get(): Observable<ThemeDto> {
+        let url_ = this.baseUrl + "/api/theme";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processTheme_Get(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processTheme_Get(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<ThemeDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ThemeDto>;
+        }));
+    }
+
+    protected processTheme_Get(response: HttpResponseBase): Observable<ThemeDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ThemeDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    theme_Update(command: UpdateThemeCommand): Observable<ThemeDto> {
+        let url_ = this.baseUrl + "/api/theme";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processTheme_Update(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processTheme_Update(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<ThemeDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ThemeDto>;
+        }));
+    }
+
+    protected processTheme_Update(response: HttpResponseBase): Observable<ThemeDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ThemeDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -996,6 +1188,114 @@ export enum FileCategory {
     Images = "Images",
     Pdfs = "Pdfs",
     Documents = "Documents",
+}
+
+export class ThemeDto implements IThemeDto {
+    id?: string;
+    primaryColor?: string;
+    secondaryColor?: string;
+    accentColor?: string;
+    fontFamily?: string;
+    isDarkMode?: boolean;
+
+    constructor(data?: IThemeDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.primaryColor = _data["primaryColor"];
+            this.secondaryColor = _data["secondaryColor"];
+            this.accentColor = _data["accentColor"];
+            this.fontFamily = _data["fontFamily"];
+            this.isDarkMode = _data["isDarkMode"];
+        }
+    }
+
+    static fromJS(data: any): ThemeDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ThemeDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["primaryColor"] = this.primaryColor;
+        data["secondaryColor"] = this.secondaryColor;
+        data["accentColor"] = this.accentColor;
+        data["fontFamily"] = this.fontFamily;
+        data["isDarkMode"] = this.isDarkMode;
+        return data;
+    }
+}
+
+export interface IThemeDto {
+    id?: string;
+    primaryColor?: string;
+    secondaryColor?: string;
+    accentColor?: string;
+    fontFamily?: string;
+    isDarkMode?: boolean;
+}
+
+export class UpdateThemeCommand implements IUpdateThemeCommand {
+    primaryColor?: string;
+    secondaryColor?: string;
+    accentColor?: string;
+    fontFamily?: string;
+    isDarkMode?: boolean;
+
+    constructor(data?: IUpdateThemeCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.primaryColor = _data["primaryColor"];
+            this.secondaryColor = _data["secondaryColor"];
+            this.accentColor = _data["accentColor"];
+            this.fontFamily = _data["fontFamily"];
+            this.isDarkMode = _data["isDarkMode"];
+        }
+    }
+
+    static fromJS(data: any): UpdateThemeCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateThemeCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["primaryColor"] = this.primaryColor;
+        data["secondaryColor"] = this.secondaryColor;
+        data["accentColor"] = this.accentColor;
+        data["fontFamily"] = this.fontFamily;
+        data["isDarkMode"] = this.isDarkMode;
+        return data;
+    }
+}
+
+export interface IUpdateThemeCommand {
+    primaryColor?: string;
+    secondaryColor?: string;
+    accentColor?: string;
+    fontFamily?: string;
+    isDarkMode?: boolean;
 }
 
 export class SwaggerException extends Error {

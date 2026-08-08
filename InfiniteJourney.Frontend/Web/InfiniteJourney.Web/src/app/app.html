@@ -6,8 +6,11 @@
     </div>
     <nav>
       <a routerLink="/campaigns">Campaigns</a>
-      @if (auth.authenticated) {
+      @if (auth.authenticated && auth.isStaff()) {
         <a routerLink="/campaigns/manage">Manage</a>
+        <a routerLink="/theme/manage">Theme Settings</a>
+      }
+      @if (auth.authenticated) {
         <span class="user">{{ auth.userName }}</span>
         <button type="button" class="btn" (click)="auth.logout()">Logout</button>
       } @else {

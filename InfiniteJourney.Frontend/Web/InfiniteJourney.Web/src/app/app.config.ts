@@ -8,12 +8,14 @@ import { errorInterceptor } from '@core/interceptors/error.interceptor';
 import { AuthService } from '@core/services/auth.service';
 import { AppConfigService } from '@core/config/app-config.service';
 import { TenantContextService } from '@core/services/tenant-context.service';
+import { ThemeService } from '@core/services/theme.service';
 import { API_BASE_URL } from '@generated/infinite-journey-apis';
 
-function initApplication(config: AppConfigService, auth: AuthService): () => Promise<void> {
+function initApplication(config: AppConfigService, auth: AuthService, theme: ThemeService): () => Promise<void> {
   return async () => {
     await config.load();
     await auth.init();
+    await theme.loadTheme();
   };
 }
 
@@ -30,7 +32,7 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: initApplication,
-      deps: [AppConfigService, AuthService],
+      deps: [AppConfigService, AuthService, ThemeService],
       multi: true
     }
   ]

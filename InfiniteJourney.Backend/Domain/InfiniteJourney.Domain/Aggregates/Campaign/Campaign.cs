@@ -72,6 +72,15 @@ public class Campaign : BaseTenantEntity
         LastModifiedAt = DateTimeOffset.UtcNow;
     }
 
+    public void Deactivate()
+    {
+        if (Status == CampaignStatus.Suspended) return;
+        if (Status != CampaignStatus.Active)
+            throw new InvalidOperationException("Only active campaigns can be deactivated.");
+        Status = CampaignStatus.Suspended;
+        LastModifiedAt = DateTimeOffset.UtcNow;
+    }
+
     public void End()
     {
         if (Status == CampaignStatus.Ended) return;

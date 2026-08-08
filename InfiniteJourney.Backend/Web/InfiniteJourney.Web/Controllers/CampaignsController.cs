@@ -75,4 +75,13 @@ public sealed class CampaignsController : ApiControllerBase
         Guid id,
         CancellationToken cancellationToken)
         => SendAsync(new ActivateCampaignCommand(id), cancellationToken);
+
+    [HttpPost(ApiRoutes.Campaigns.Deactivate)]
+    [Authorize(Policy = "TenantStaff")]
+    [ProducesResponseType(typeof(CampaignDetailDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public Task<IActionResult> Deactivate(
+        Guid id,
+        CancellationToken cancellationToken)
+        => SendAsync(new DeactivateCampaignCommand(id), cancellationToken);
 }

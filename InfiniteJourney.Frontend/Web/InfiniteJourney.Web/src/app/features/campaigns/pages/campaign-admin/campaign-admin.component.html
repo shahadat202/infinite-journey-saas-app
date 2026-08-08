@@ -1,73 +1,69 @@
-<section class="admin">
+<div class="campaign-admin-container">
   <div class="header-row">
     <div>
-      <a routerLink="/campaigns" class="back">← Public campaigns</a>
-      <h1>Manage campaigns</h1>
+      <a routerLink="/campaigns" class="back-link">← View Public Campaigns</a>
+      <h1>Manage Campaigns</h1>
     </div>
-    <button type="button" class="btn btn-primary" (click)="openCreate()">New campaign</button>
+    <button nz-button nzType="primary" routerLink="/campaigns/manage/new">New Campaign</button>
   </div>
 
-  <app-data-grid
-    title="All campaigns"
-    [columns]="columns"
-    [result]="result()"
-    [loading]="loading()"
-    searchPlaceholder="Search title or description…"
-    (queryChange)="load($event)"
-    (rowAction)="onRowAction($event)"
-  />
+  <nz-card [nzBordered]="false" class="table-card">
+    <div class="table-actions">
+      <input nz-input placeholder="Search title or description..." [value]="search()" (input)="onSearch($event)" class="search-input" />
+    </div>
 
-  @if (showForm()) {
-    <div class="overlay" (click)="closeForm()"></div>
-    <aside class="panel" (click)="$event.stopPropagation()">
-      <header>
-        <h2>{{ editingId() ? 'Edit campaign' : 'New campaign' }}</h2>
-        <button type="button" class="icon-btn" (click)="closeForm()">×</button>
-      </header>
-
-      <form [formGroup]="form" (ngSubmit)="save()">
-        <label>
-          Title
-          <input formControlName="title" />
-        </label>
-
-        <label>
-          Description
-          <textarea rows="4" formControlName="description"></textarea>
-        </label>
-
-        <label>
-          Target amount
-          <input type="number" formControlName="targetAmount" min="1" />
-        </label>
-
-        <label>
-          Start date
-          <input type="date" formControlName="startDate" />
-        </label>
-
-        <label>
-          End date
-          <input type="date" formControlName="endDate" />
-        </label>
-
-        <div class="upload">
-          <label class="file-label">
-            Cover image
-            <input type="file" accept="image/*" (change)="onFileSelected($event)" />
-          </label>
-          @if (coverPreview()) {
-            <img [src]="coverPreview()!" alt="Cover preview" class="preview" />
-          }
-        </div>
-
-        <div class="form-actions">
-          <button type="button" class="btn" (click)="closeForm()">Cancel</button>
-          <button type="submit" class="btn btn-primary" [disabled]="saving()">
-            {{ saving() ? 'Saving…' : 'Save' }}
-          </button>
-        </div>
-      </form>
-    </aside>
-  }
-</section>
+    <nz-table
+      nzShowSizeChanger
+      [nzData]="data()"
+      [nzFrontPagination]="false"
+      [nzLoading]="loading()"
+      [nzTotal]="total()"
+      [nzPageSize]="pageSize()"
+      [nzPageIndex]="pageIndex()"
+      (nzQueryParams)="onQueryParamsChange($event)"
+    >
+      <thead>
+        <tr>
+          <th nzColumnKey="title" [nzSortFn]="true">Title</th>
+          <th nzColumnKey="status" [nzSortFn]="true">Status</th>
+          <th nzColumnKey="targetamount" [nzSortFn]="true">Target</th>
+          <th nzColumnKey="raisedamount" [nzSortFn]="true">Raised</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of data(); track row.id) {
+          <tr>
+            <td>
+              <div class="campaign-title-cell">
+                @if (row.coverImageUrl) {
+                  <img [src]="api.resolveMediaUrl(row.coverImageUrl)" alt="" class="campaign-thumb" />
+                }
+                <span class="campaign-name">{{ row.title }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="status-tag status-tag--{{ row.status.toLowerCase() }}">
+                {{ row.status }}
+              </span>
+            </td>
+            <td>${{ row.targetAmount | number }}</td>
+            <td>${{ row.raisedAmount | number }}</td>
+            <td>
+              <div class="action-buttons">
+                @if (row.status === 'Active') {
+                  <button nz-button nzType="default" nzDanger (click)="toggleActivation(row)">Deactivate</button>
+                } @else if (row.status === 'Draft' || row.status === 'Suspended') {
+                  <button nz-button nzType="default" (click)="toggleActivation(row)">Activate</button>
+                }
+                
+                <button nz-button nzType="default" [routerLink]="['/campaigns/manage/edit', row.id]">Edit</button>
+                <button nz-button nzType="default" nzDanger (click)="deleteCampaign(row)">Delete</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>

@@ -11,3 +11,17 @@ export const authGuard: CanActivateFn = () => {
   auth.login();
   return router.createUrlTree(['/campaigns']);
 };
+
+export const staffGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+
+  if (auth.authenticated && auth.isStaff()) return true;
+
+  if (!auth.authenticated) {
+    auth.login();
+    return false;
+  }
+
+  return router.createUrlTree(['/campaigns']);
+};

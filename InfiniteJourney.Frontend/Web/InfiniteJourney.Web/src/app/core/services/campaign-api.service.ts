@@ -53,6 +53,10 @@ export class CampaignApiService {
     return this.http.post<CampaignDetail>(this.url(`/api/campaigns/${id}/activate`), {});
   }
 
+  deactivate(id: string): Observable<CampaignDetail> {
+    return this.http.post<CampaignDetail>(this.url(`/api/campaigns/${id}/deactivate`), {});
+  }
+
   uploadFile(
     fileName: string,
     contentType: string,

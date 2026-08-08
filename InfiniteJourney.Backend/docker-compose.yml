@@ -40,6 +40,9 @@ services:
       Keycloak__Authority: ${KEYCLOAK_AUTHORITY:-http://host.docker.internal:8080/realms/InfiniteJourney}
       Keycloak__RequireHttpsMetadata: "false"
       MultiTenancy__PlatformDomain: ${MULTITENANCY_PLATFORM_DOMAIN:-infinitejourney.com}
+      Storage__RootPath: /app/UPLOADED_DATA
+    volumes:
+      - api_uploads:/app/UPLOADED_DATA
     ports:
       - "${API_PORT:-5274}:8080"
     depends_on:
@@ -50,3 +53,4 @@ services:
 
 volumes:
   postgres_data:
+  api_uploads:

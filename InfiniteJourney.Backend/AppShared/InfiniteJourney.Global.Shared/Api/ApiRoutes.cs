@@ -12,6 +12,12 @@ public static class ApiRoutes
         public const string Base = $"{ApiRoot}/campaigns";
         public const string ById = "{id:guid}";
         public const string Activate = "{id:guid}/activate";
+        public const string Deactivate = "{id:guid}/deactivate";
+    }
+
+    public static class Theme
+    {
+        public const string Base = $"{ApiRoot}/theme";
     }
 
     public static class Files

@@ -1,0 +1,76 @@
+<div class="campaign-form-container">
+  <nz-card [nzTitle]="editingId() ? 'Edit Campaign' : 'Create Campaign'" [nzBordered]="false" class="form-card">
+    <form nz-form [formGroup]="form" (ngSubmit)="save()" nzLayout="vertical">
+      
+      <!-- Title -->
+      <nz-form-item>
+        <nz-form-label nzRequired>Campaign Title</nz-form-label>
+        <nz-form-control nzErrorTip="Please enter a campaign title (max 200 characters)">
+          <input nz-input formControlName="title" placeholder="E.g., Winter Food Distribution" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Description -->
+      <nz-form-item>
+        <nz-form-label nzRequired>Description</nz-form-label>
+        <nz-form-control nzErrorTip="Please write a description (max 4000 characters)">
+          <textarea nz-input formControlName="description" rows="6" placeholder="Provide background context, goals, and why people should donate..."></textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Target Amount -->
+      <nz-form-item>
+        <nz-form-label nzRequired>Target Amount</nz-form-label>
+        <nz-form-control nzErrorTip="Target amount must be at least 1">
+          <nz-input-number formControlName="targetAmount" [nzMin]="1" [nzStep]="100" class="w-full"></nz-input-number>
+        </nz-form-control>
+      </nz-form-item>
+
+      <div class="date-row">
+        <!-- Start Date -->
+        <nz-form-item class="date-item">
+          <nz-form-label>Start Date</nz-form-label>
+          <nz-form-control>
+            <nz-date-picker formControlName="startDate" class="w-full"></nz-date-picker>
+          </nz-form-control>
+        </nz-form-item>
+
+        <!-- End Date -->
+        <nz-form-item class="date-item">
+          <nz-form-label>End Date</nz-form-label>
+          <nz-form-control>
+            <nz-date-picker formControlName="endDate" class="w-full"></nz-date-picker>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <!-- Cover Image Upload -->
+      <div class="upload-section">
+        <label class="form-label">Cover Image</label>
+        <div class="upload-dropzone">
+          @if (!coverPreview()) {
+            <label class="upload-trigger">
+              <span class="upload-icon">📁</span>
+              <span class="upload-text">Click to upload a cover image</span>
+              <input type="file" accept="image/*" class="file-input-hidden" (change)="onFileSelected($event)" [disabled]="saving()" />
+            </label>
+          } @else {
+            <div class="preview-container">
+              <img [src]="coverPreview()!" alt="Cover Image" class="cover-image-preview" />
+              <button type="button" class="remove-btn" (click)="removeCover()" [disabled]="saving()">Remove Cover</button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button nz-button nzType="default" type="button" routerLink="/campaigns/manage">Cancel</button>
+        <button nz-button nzType="primary" type="submit" [nzLoading]="saving()">
+          {{ editingId() ? 'Save Changes' : 'Create Campaign' }}
+        </button>
+      </div>
+
+    </form>
+  </nz-card>
+</div>

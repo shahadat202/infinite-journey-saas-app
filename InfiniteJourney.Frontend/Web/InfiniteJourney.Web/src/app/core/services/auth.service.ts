@@ -41,4 +41,25 @@ export class AuthService {
   get userName(): string {
     return this.keycloak.tokenParsed?.['preferred_username'] ?? this.keycloak.tokenParsed?.['email'] ?? '';
   }
+
+  hasRole(role: string): boolean {
+    return this.keycloak?.hasRealmRole(role) ?? false;
+  }
+
+  hasAnyRole(roles: string[]): boolean {
+    return roles.some((role) => this.hasRole(role));
+  }
+
+  isStaff(): boolean {
+    const staffRoles = [
+      'OrganizationAdmin',
+      'OrgAdmin',
+      'Organization Owner',
+      'Staff',
+      'Volunteer Coordinator',
+      'Content Manager',
+      'Finance Manager',
+    ];
+    return this.hasAnyRole(staffRoles);
+  }
 }
