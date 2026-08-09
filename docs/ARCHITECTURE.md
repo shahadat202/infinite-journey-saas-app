@@ -526,6 +526,57 @@ document.documentElement.style.setProperty('--secondary-color', theme.secondaryC
 document.documentElement.style.setProperty('--font-family', theme.fontFamily);
 ```
 
+**Responsive design with Tailwind CSS** — Mobile-first approach with utility classes:
+
+```typescript
+// Tailwind configured to use CSS variables for theming
+colors: {
+  primary:   'var(--primary)',
+  secondary: 'var(--secondary)',
+  accent:    'var(--accent)',
+}
+```
+
+**Collapsible sidebar navigation** — Professional navigation with responsive behavior:
+
+```typescript
+// Desktop: Always visible, sticky positioning
+// Mobile/Tablet: Collapsible with hamburger menu
+protected readonly sidebarCollapsed = signal(false);
+protected toggleSidebar(): void {
+  this.sidebarCollapsed.update(collapsed => !collapsed);
+}
+```
+
+**Rich text editing with Quill.js** — Professional content creation:
+
+```typescript
+// Quill editor integrated for campaign descriptions
+protected readonly editorModules = {
+  toolbar: [
+    ['bold', 'italic', 'underline', 'strike'],
+    ['blockquote', 'code-block'],
+    [{ 'header': 1 }, { 'header': 2 }],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    ['link', 'clean']
+  ]
+};
+```
+
+**Debounced search** — Performance optimization for search inputs:
+
+```typescript
+// 300ms debounce prevents excessive API calls
+private readonly searchSubject = new Subject<string>();
+this.searchSubject.pipe(
+  debounceTime(300),
+  distinctUntilChanged()
+).subscribe(searchTerm => {
+  this.search.set(searchTerm);
+  this.loadData();
+});
+```
+
 **Silent SSO** — `keycloak-js` checks existing sessions without interrupting the user:
 
 ```html

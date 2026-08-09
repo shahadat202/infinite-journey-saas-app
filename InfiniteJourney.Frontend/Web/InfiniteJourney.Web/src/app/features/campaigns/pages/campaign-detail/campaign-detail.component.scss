@@ -27,3 +27,52 @@
 .amounts {
   color: var(--muted);
 }
+
+.description-content {
+  line-height: 1.7;
+  margin: 1.5rem 0;
+  
+  h1, h2, h3, h4, h5, h6 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+  
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  
+  p {
+    margin-bottom: 1rem;
+  }
+  
+  ul, ol {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+  
+  li {
+    margin-bottom: 0.5rem;
+  }
+  
+  blockquote {
+    border-left: 4px solid var(--primary);
+    padding-left: 1rem;
+    margin: 1rem 0;
+    color: var(--muted);
+    font-style: italic;
+  }
+  
+  strong {
+    font-weight: 600;
+  }
+  
+  em {
+    font-style: italic;
+  }
+  
+  a {
+    color: var(--primary);
+    text-decoration: underline;
+  }
+}

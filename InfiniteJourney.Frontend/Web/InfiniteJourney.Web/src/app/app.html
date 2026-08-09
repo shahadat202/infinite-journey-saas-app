@@ -1,27 +1,56 @@
 <div class="layout">
   <header class="header">
     <div class="brand">
+      <button type="button" class="menu-toggle" (click)="toggleSidebar()" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
       <a routerLink="/">{{ tenant.tenantLabel() }}</a>
       <span class="tag">InfiniteJourney</span>
     </div>
-    <nav>
-      <a routerLink="/campaigns">Campaigns</a>
-      @if (auth.authenticated && auth.isStaff()) {
-        <a routerLink="/campaigns/manage">Manage</a>
-        <a routerLink="/theme/manage">Theme Settings</a>
-      }
+    <div class="header-actions">
       @if (auth.authenticated) {
         <span class="user">{{ auth.userName }}</span>
         <button type="button" class="btn" (click)="auth.logout()">Logout</button>
       } @else {
         <button type="button" class="btn btn-primary" (click)="auth.login()">Sign in</button>
       }
-    </nav>
+    </div>
   </header>
 
-  <main class="main">
-    <router-outlet />
-  </main>
+  <div class="content-wrapper">
+    <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Main</div>
+          <a routerLink="/campaigns" class="nav-link" routerLinkActive="active">
+            <span class="nav-icon">📢</span>
+            <span class="nav-text">Campaigns</span>
+          </a>
+        </div>
+        
+        @if (auth.authenticated && auth.isStaff()) {
+          <div class="nav-section">
+            <div class="nav-section-title">Manage</div>
+            <a routerLink="/campaigns/manage" class="nav-link" routerLinkActive="active">
+              <span class="nav-icon">⚙️</span>
+              <span class="nav-text">Campaigns</span>
+            </a>
+            <a routerLink="/theme/manage" class="nav-link" routerLinkActive="active">
+              <span class="nav-icon">🎨</span>
+              <span class="nav-text">Theme Settings</span>
+            </a>
+          </div>
+        }
+      </nav>
+    </aside>
 
+    <main class="main">
+      <router-outlet />
+    </main>
+  </div>
+
+  <div class="sidebar-overlay" [class.active]="!sidebarCollapsed()" (click)="toggleSidebar()"></div>
   <app-toast-container />
 </div>

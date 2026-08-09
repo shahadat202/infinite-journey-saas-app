@@ -40,6 +40,21 @@ export class ThemeAdminComponent implements OnInit {
     { value: 'Poppins, sans-serif', label: 'Poppins' }
   ];
 
+  protected readonly presetColors = [
+    '#1e3a8a', '#3b82f6', '#0ea5e9', '#06b6d4',
+    '#10b981', '#22c55e', '#84cc16', '#eab308',
+    '#f59e0b', '#f97316', '#ef4444', '#ec4899',
+    '#8b5cf6', '#6366f1', '#64748b', '#0f172a'
+  ];
+
+  protected onColorChange(field: string, value: string): void {
+    this.form.patchValue({ [field]: value });
+  }
+
+  protected selectPresetColor(field: string, color: string): void {
+    this.form.patchValue({ [field]: color });
+  }
+
   protected readonly form = this.fb.nonNullable.group({
     primaryColor: ['#1e3a8a', [Validators.required, Validators.pattern(/^#[0-9a-fA-F]{6}$/)]],
     secondaryColor: ['#10b981', [Validators.required, Validators.pattern(/^#[0-9a-fA-F]{6}$/)]],

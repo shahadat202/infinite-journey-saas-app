@@ -10,7 +10,7 @@
       <img class="cover" [src]="coverUrl(c)" [alt]="c.title" />
     }
     <h1>{{ c.title }}</h1>
-    <p>{{ c.description }}</p>
+    <div class="description-content" [innerHTML]="c.description"></div>
     <div class="progress">
       <div class="bar" [style.width.%]="c.progressPercent"></div>
     </div>

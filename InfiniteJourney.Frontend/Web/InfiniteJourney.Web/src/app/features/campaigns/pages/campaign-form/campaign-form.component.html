@@ -13,8 +13,13 @@
       <!-- Description -->
       <nz-form-item>
         <nz-form-label nzRequired>Description</nz-form-label>
-        <nz-form-control nzErrorTip="Please write a description (max 4000 characters)">
-          <textarea nz-input formControlName="description" rows="6" placeholder="Provide background context, goals, and why people should donate..."></textarea>
+        <nz-form-control nzErrorTip="Please write a description">
+          <quill-editor
+            formControlName="description"
+            [modules]="editorModules"
+            [styles]="{ height: '200px' }"
+            placeholder="Provide background context, goals, and why people should donate..."
+          ></quill-editor>
         </nz-form-control>
       </nz-form-item>
 
@@ -31,7 +36,7 @@
         <nz-form-item class="date-item">
           <nz-form-label>Start Date</nz-form-label>
           <nz-form-control>
-            <nz-date-picker formControlName="startDate" class="w-full"></nz-date-picker>
+            <nz-date-picker formControlName="startDate" class="w-full" [nzFormat]="'MMM dd, yyyy'"></nz-date-picker>
           </nz-form-control>
         </nz-form-item>
 
@@ -39,7 +44,7 @@
         <nz-form-item class="date-item">
           <nz-form-label>End Date</nz-form-label>
           <nz-form-control>
-            <nz-date-picker formControlName="endDate" class="w-full"></nz-date-picker>
+            <nz-date-picker formControlName="endDate" class="w-full" [nzFormat]="'MMM dd, yyyy'"></nz-date-picker>
           </nz-form-control>
         </nz-form-item>
       </div>

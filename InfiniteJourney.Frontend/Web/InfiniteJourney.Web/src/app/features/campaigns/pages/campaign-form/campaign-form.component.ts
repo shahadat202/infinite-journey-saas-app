@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { CampaignApiService } from '@core/services/campaign-api.service';
 import { FileUploadService } from '@core/services/file-upload.service';
 import { ToastService } from '@core/services/toast.service';
@@ -10,6 +10,7 @@ import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
+import { QuillModule } from 'ngx-quill';
 
 @Component({
   selector: 'app-campaign-form',
@@ -21,7 +22,8 @@ import { NzCardModule } from 'ng-zorro-antd/card';
     NzInputNumberModule,
     NzDatePickerModule,
     NzButtonModule,
-    NzCardModule
+    NzCardModule,
+    QuillModule
   ],
   templateUrl: './campaign-form.component.html',
   styleUrl: './campaign-form.component.scss'
@@ -38,6 +40,18 @@ export class CampaignFormComponent implements OnInit {
   protected readonly saving = signal(false);
   protected readonly editingId = signal<string | null>(null);
   protected readonly coverPreview = signal<string | null>(null);
+
+  protected readonly editorModules = {
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],
+      ['blockquote', 'code-block'],
+      [{ 'header': 1 }, { 'header': 2 }],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'script': 'sub'}, { 'script': 'super' }],
+      [{ 'indent': '-1'}, { 'indent': '+1' }],
+      ['link', 'clean']
+    ]
+  };
 
   protected readonly form = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(200)]],

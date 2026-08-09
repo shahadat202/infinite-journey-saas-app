@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { CampaignListItem } from '@core/models/campaign.model';
 import { GridQuery } from '@core/models/grid.model';
 import { CampaignApiService } from '@core/services/campaign-api.service';
@@ -29,7 +30,18 @@ export class CampaignAdminComponent implements OnInit {
   protected readonly sortBy = signal('createdat');
   protected readonly sortDir = signal<'asc' | 'desc'>('desc');
 
+  private readonly searchSubject = new Subject<string>();
+
   ngOnInit(): void {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(searchTerm => {
+      this.search.set(searchTerm);
+      this.pageIndex.set(1);
+      this.loadData();
+    });
+
     this.loadData();
   }
 
@@ -72,9 +84,7 @@ export class CampaignAdminComponent implements OnInit {
 
   onSearch(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.search.set(input.value);
-    this.pageIndex.set(1);
-    this.loadData();
+    this.searchSubject.next(input.value);
   }
 
   toggleActivation(row: CampaignListItem): void {
