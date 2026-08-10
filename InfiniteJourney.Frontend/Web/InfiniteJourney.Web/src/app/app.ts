@@ -14,8 +14,19 @@ export class App {
   protected readonly auth = inject(AuthService);
   protected readonly tenant = inject(TenantContextService);
   protected readonly sidebarCollapsed = signal(false);
+  protected readonly sidebarIconOnly = signal(false);
 
   protected toggleSidebar(): void {
     this.sidebarCollapsed.update(collapsed => !collapsed);
+  }
+
+  protected toggleSidebarIconOnly(): void {
+    this.sidebarIconOnly.update(iconOnly => !iconOnly);
+  }
+
+  protected closeSidebarOnMobile(): void {
+    if (window.innerWidth < 1024) {
+      this.sidebarCollapsed.set(true);
+    }
   }
 }

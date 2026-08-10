@@ -4,6 +4,19 @@
   padding: 2.5rem 1.5rem;
 }
 
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--primary);
+  }
+}
+
 .form-card {
   width: 100%;
   max-width: 780px;
@@ -14,7 +27,9 @@
 
 @media (max-width: 768px) {
   .campaign-form-container {
-    padding: 1.5rem 1rem;
+    padding: 2rem 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
   }
 
   .date-row {

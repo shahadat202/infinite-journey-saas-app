@@ -9,13 +9,13 @@
     <div class="grid">
       @for (campaign of campaigns(); track campaign.id) {
         <article class="card">
-          @if (coverUrl(campaign)) {
-            <img class="cover" [src]="coverUrl(campaign)" [alt]="campaign.title" />
-          }
-          <h2 class="line-clamp-2">
-            <a [routerLink]="['/campaigns', campaign.id]">{{ campaign.title }}</a>
-          </h2>
-          <p class="line-clamp-3">{{ campaign.description }}</p>
+          <a [routerLink]="['/campaigns', campaign.id]" class="card-link">
+            @if (coverUrl(campaign)) {
+              <img class="cover" [src]="coverUrl(campaign)" [alt]="campaign.title" />
+            }
+            <h2 class="line-clamp-2">{{ campaign.title }}</h2>
+          </a>
+          <p class="line-clamp-3 description-text" [innerHTML]="campaign.description"></p>
           <div class="progress">
             <div class="bar" [style.width.%]="progress(campaign)"></div>
           </div>

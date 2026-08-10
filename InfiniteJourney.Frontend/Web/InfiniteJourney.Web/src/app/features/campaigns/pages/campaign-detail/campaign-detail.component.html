@@ -10,13 +10,15 @@
       <img class="cover" [src]="coverUrl(c)" [alt]="c.title" />
     }
     <h1>{{ c.title }}</h1>
-    <div class="description-content" [innerHTML]="c.description"></div>
-    <div class="progress">
-      <div class="bar" [style.width.%]="c.progressPercent"></div>
+    <div class="progress-section">
+      <div class="progress">
+        <div class="bar" [style.width.%]="c.progressPercent"></div>
+      </div>
+      <p class="amounts">
+        <strong>{{ c.raisedAmount | number:'1.0-0' }}</strong>
+        raised of {{ c.targetAmount | number:'1.0-0' }} ({{ c.progressPercent }}%)
+      </p>
     </div>
-    <p class="amounts">
-      <strong>{{ c.raisedAmount | number:'1.0-0' }}</strong>
-      raised of {{ c.targetAmount | number:'1.0-0' }} ({{ c.progressPercent }}%)
-    </p>
+    <div class="description-content" [innerHTML]="c.description"></div>
   }
 </section>

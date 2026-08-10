@@ -23,12 +23,28 @@ Build the complete `Donation` vertical slice — backend CQRS handlers, domain e
 - ✅ Added CSS line-clamp utilities for proper text ellipsis
 - ✅ Integrated Quill.js rich text editor for campaign descriptions
 - ✅ Campaign detail pages now render HTML content with proper styling
+- ✅ Fixed campaign list to render HTML instead of showing raw tags
 
 ### Responsive Design & Navigation
 - ✅ Implemented Tailwind CSS framework for responsive design
 - ✅ Created collapsible left sidebar with Main and Manage sections
 - ✅ Mobile-first approach with hamburger menu and overlay
 - ✅ Professional animations and transitions
+- ✅ Added desktop sidebar toggle for icon-only vs icon+label mode
+- ✅ Auto-close mobile sidebar after navigation click
+- ✅ Replaced emoji icons with Font Awesome icons
+
+### Campaign UX Improvements
+- ✅ Made entire campaign card clickable (image + title)
+- ✅ Bold titles for better visual hierarchy
+- ✅ Moved progress bar above description in detail page
+- ✅ Fixed text overflow with proper container styling
+- ✅ Added back button to campaign create/edit pages
+
+### Admin Table Responsive Design
+- ✅ Made admin table horizontally scrollable on smaller screens
+- ✅ Added three-dot dropdown menu for mobile/tablet actions
+- ✅ Icons for each action (edit, delete, activate/deactivate)
 
 ### Theme & Localization
 - ✅ Enhanced color picker with 16 preset colors and hover effects

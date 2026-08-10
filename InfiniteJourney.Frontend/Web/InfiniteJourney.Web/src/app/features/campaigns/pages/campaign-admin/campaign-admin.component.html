@@ -12,7 +12,8 @@
       <input nz-input placeholder="Search title or description..." [value]="search()" (input)="onSearch($event)" class="search-input" />
     </div>
 
-    <nz-table
+    <div class="table-wrapper">
+      <nz-table
       nzShowSizeChanger
       [nzData]="data()"
       [nzFrontPagination]="false"
@@ -51,7 +52,7 @@
             <td>${{ row.targetAmount | number }}</td>
             <td>${{ row.raisedAmount | number }}</td>
             <td>
-              <div class="action-buttons">
+              <div class="action-buttons desktop-actions">
                 @if (row.status === 'Active') {
                   <button nz-button nzType="default" nzDanger (click)="toggleActivation(row)">Deactivate</button>
                 } @else if (row.status === 'Draft' || row.status === 'Suspended') {
@@ -61,10 +62,38 @@
                 <button nz-button nzType="default" [routerLink]="['/campaigns/manage/edit', row.id]">Edit</button>
                 <button nz-button nzType="default" nzDanger (click)="deleteCampaign(row)">Delete</button>
               </div>
+              
+              <div class="mobile-actions">
+                <div style="position: relative;">
+                  <button nz-button nzType="text" class="action-menu-btn" (click)="toggleActionMenu(row.id)">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  @if (actionMenuOpen() === row.id) {
+                    <div class="action-menu-dropdown">
+                      @if (row.status === 'Active') {
+                        <div class="menu-item" (click)="toggleActivation(row)">
+                          <i class="fas fa-pause-circle"></i> Deactivate
+                        </div>
+                      } @else if (row.status === 'Draft' || row.status === 'Suspended') {
+                        <div class="menu-item" (click)="toggleActivation(row)">
+                          <i class="fas fa-play-circle"></i> Activate
+                        </div>
+                      }
+                      <div class="menu-item" [routerLink]="['/campaigns/manage/edit', row.id]">
+                        <i class="fas fa-edit"></i> Edit
+                      </div>
+                      <div class="menu-item danger" (click)="deleteCampaign(row)">
+                        <i class="fas fa-trash"></i> Delete
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
             </td>
           </tr>
         }
       </tbody>
     </nz-table>
+    </div>
   </nz-card>
 </div>

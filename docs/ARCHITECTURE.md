@@ -563,6 +563,32 @@ protected readonly editorModules = {
 };
 ```
 
+**Font Awesome icons** — Professional iconography:
+
+```typescript
+// Font Awesome icons for navigation and actions
+<i class="fas fa-bullhorn"></i>    // Campaigns
+<i class="fas fa-cog"></i>         // Settings
+<i class="fas fa-palette"></i>     // Theme
+<i class="fas fa-ellipsis-v"></i>  // More actions
+```
+
+**Responsive table with action menu** — Mobile-friendly data tables:
+
+```typescript
+// Desktop: Full action buttons
+// Mobile/Tablet: Three-dot dropdown menu
+<nz-dropdown nzTrigger="click" nzPlacement="bottomRight">
+  <button nz-button nzType="text">
+    <i class="fas fa-ellipsis-v"></i>
+  </button>
+  <ul nz-menu>
+    <li nz-menu-item><i class="fas fa-edit"></i> Edit</li>
+    <li nz-menu-item nzDanger><i class="fas fa-trash"></i> Delete</li>
+  </ul>
+</nz-dropdown>
+```
+
 **Debounced search** — Performance optimization for search inputs:
 
 ```typescript

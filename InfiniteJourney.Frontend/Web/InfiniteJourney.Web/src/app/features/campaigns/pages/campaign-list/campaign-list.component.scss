@@ -14,7 +14,28 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 1.25rem;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+
+  h2 {
+    font-weight: 600;
+    transition: color 0.2s ease;
+  }
+
+  &:hover h2 {
+    color: var(--primary);
+  }
 }
 
 .cover {

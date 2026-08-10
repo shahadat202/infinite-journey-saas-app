@@ -1,4 +1,5 @@
 <div class="campaign-form-container">
+  <a routerLink="/campaigns/manage" class="back-link">← Back to Campaigns</a>
   <nz-card [nzTitle]="editingId() ? 'Edit Campaign' : 'Create Campaign'" [nzBordered]="false" class="form-card">
     <form nz-form [formGroup]="form" (ngSubmit)="save()" nzLayout="vertical">
       

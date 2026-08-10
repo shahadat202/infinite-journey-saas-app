@@ -29,6 +29,7 @@ export class CampaignAdminComponent implements OnInit {
   protected readonly search = signal('');
   protected readonly sortBy = signal('createdat');
   protected readonly sortDir = signal<'asc' | 'desc'>('desc');
+  protected readonly actionMenuOpen = signal<string | null>(null);
 
   private readonly searchSubject = new Subject<string>();
 
@@ -85,6 +86,10 @@ export class CampaignAdminComponent implements OnInit {
   onSearch(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.searchSubject.next(input.value);
+  }
+
+  toggleActionMenu(id: string): void {
+    this.actionMenuOpen.set(this.actionMenuOpen() === id ? null : id);
   }
 
   toggleActivation(row: CampaignListItem): void {
