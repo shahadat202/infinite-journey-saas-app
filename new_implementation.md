@@ -1,225 +1,212 @@
-# New Implementation Details
+# InfiniteJourney — Implementation Change Log
 
-This document records the design decisions and implementation details for the updates made during this cycle.
-
-## 1. User & Role Clearance
-
-### Campaign Manage Tab Visibility
-
-- **Current Behavior**: The "Manage" tab appears on the nav bar simply if the user is authenticated.
-- **Improved Behavior**: We restrict the "Manage" navigation tab in both the frontend layout and the router settings using a role check.
-- **Roles**: Only users with staff/managerial roles (`OrganizationOwner`, `OrganizationAdmin`, `Staff`, `Volunteer Coordinator`, `Content Manager`, `Finance Manager`) can see and navigate to the management console.
-- **RBAC**: Handled dynamically using Keycloak realm and resource roles client-side (`AuthService.isStaff()`) and server-side policy guards (`[Authorize(Policy = "TenantStaff")]`).
+> **Purpose:** Tracks every structural, architectural, and code-quality change made  
+> during active development sessions. Ordered newest-first.  
+> For the full roadmap → `implementation_plan.md`  
+> For architecture decisions → `docs/ARCHITECTURE.md`  
+> For class diagrams → `docs/diagram.md`
 
 ---
 
-## 2. File Upload & Storage Strategy
+## Session — Phase 1 Refinement (Current)
 
-- **Backend Storage**: The backend maintains clean, local file storage isolated by tenant GUID.
-- **Standard Flow**: The frontend reads files as base64 strings and submits them to `/api/files/upload`. The backend saves them to a structured path under the directory specified by `Storage:RootPath`, returning a short path like `/uploads/{tenantGuid}/images/{guid}.ext`.
-- **Local Dev vs. Docker Production**:
-  - Locally, the file root defaults to `UPLOADED_DATA` in the repository root.
-  - In Docker, we configure `Storage__RootPath` to save to `/app/UPLOADED_DATA` and link it to a Docker volume `api_uploads` to ensure images persist across restarts.
+### 1. UML Class Diagram (`docs/diagram.md`)
 
----
+**Added:** `docs/diagram.md` — full Mermaid class diagrams for all four layers.
 
-## 3. Premium Toast Notifications
+Covers:
+- Domain layer: `BaseEntity`, `BaseTenantEntity`, all aggregate roots, domain events
+- Application layer: CQRS abstractions, all campaign commands/queries, DTOs, grid models, exception hierarchy
+- Infrastructure layer: `ApplicationDbContext`, interceptor, tenant/user/file services
+- Web layer: `ApiControllerBase`, controllers, middleware
+- Enum reference
+- Full layer dependency map
 
-- **Styling**: Distinct colors and matching outline icons:
-  - **Success**: Soft green (#059669 border, light background), checkmark icon. Auto-dismisses in 5s.
-  - **Warning**: Warm yellow (#d97706 border, light background), alert triangle icon. Auto-dismisses in 5s.
-  - **Error**: Vivid red (#dc2626 border, light background), cross circle icon. **Does not auto-dismiss** (persists until closed manually by the user).
-- **Control**: Every toast has a close button in the top-right corner.
+Import each section into [draw.io](https://app.diagrams.net/) via `Extras → Edit Diagram`.
 
 ---
 
-## 4. NZ-Zorro Campaign Management
+### 2. Campaign Feature — Structural Cleanup
 
-- **NZ-Table Integration**: The list view utilizes `nz-table` for standard styling, including headers, row dividers, page size dropdowns, and pagination controls.
-- **New Campaign View / Form Page**: We replace the sidebar drawer with a standalone edit/create view `/campaigns/manage/new` and `/campaigns/manage/edit/:id`. This page uses standard inputs, date pickers, target limits, and cover image upload zones styled via NG-ZORRO.
+#### `CampaignModels.cs` — DTOs and Mappings merged into one file
 
----
+**Before:** Separate `Dtos/CampaignDtos.cs` and `Mappings/CampaignMappings.cs` folders.  
+**After:** Single `Campaigns/Dtos/CampaignModels.cs` — all DTOs + static mapping extensions together.
 
-## 5. Deactivation Toggles
+```
+Campaigns/
+├── CampaignModels.cs          ← DTOs + CampaignMappings (one file, one scroll)
+├── Commands/
+│   ├── Index.cs               ← Pure application contracts only
+│   ├── CreateCampaignCommandHandler.cs   ← Handler + Validator together
+│   ├── UpdateCampaignCommandHandler.cs   ← Handler + Validator together
+│   ├── DeleteCampaignCommandHandler.cs
+│   └── ActivateCampaignCommandHandler.cs
+└── Queries/
+    ├── Index.cs
+    ├── GetCampaignsQueryHandler.cs
+    └── GetCampaignByIdQueryHandler.cs
+```
 
-- **Functionality**: We wire the campaign row action to a single toggle button.
-  - If status is `Active`, the button displays "Deactivate". Clicking it calls `POST /api/campaigns/{id}/deactivate` and updates the state.
-  - If status is `Draft` or `Suspended`, the button displays "Activate". Clicking it calls `POST /api/campaigns/{id}/activate`.
-
----
-
-## 6. Dynamic Tenant Theme Setup
-
-- **Backend Configuration**: Extends `Theme` entity containing variables for PrimaryColor, SecondaryColor, AccentColor, FontFamily, and IsDarkMode.
-- **Frontend Integration**: We create a `/theme/manage` setting dashboard.
-- **DOM Injection**: On app bootstrap (`APP_INITIALIZER`), the frontend calls `GET /api/theme` to load the tenant theme. The theme service translates the values to custom CSS properties (`--primary`, `--secondary`, etc.) injected into the document root, causing the entire UI colors and fonts to adjust instantly.
-
----
-
-## 7. UI/UX Professional Improvements (Latest Cycle)
-
-### 7.1 Text Truncation with Ellipsis
-
-- **Implementation**: Added CSS line-clamp utilities for campaign cards and detail views.
-- **Behavior**: Long text content (titles, descriptions) now truncates with "..." after 2-3 lines instead of expanding indefinitely.
-- **Files Modified**: `campaign-list.component.html`, `campaign-list.component.scss`
-
-### 7.2 Rich Text Editor for Campaign Descriptions
-
-- **Implementation**: Integrated Quill.js rich text editor (`ngx-quill`) for campaign creation/editing.
-- **Features**: Bold, italic, underline, headings, lists, blockquotes, links, and more.
-- **Display**: Campaign detail pages now render HTML content using `[innerHTML]` with proper styling for all rich text elements.
-- **Files Modified**: `campaign-form.component.html`, `campaign-form.component.ts`, `campaign-detail.component.html`, `campaign-detail.component.scss`
-- **Dependencies Added**: `ngx-quill`, `quill`
-
-### 7.3 Full Responsive Design with Tailwind CSS
-
-- **Implementation**: Added Tailwind CSS framework with custom configuration using CSS variables.
-- **Responsive Breakpoints**:
-  - Desktop (>1024px): Full sidebar, multi-column layouts
-  - Tablet (768px-1024px): Collapsible sidebar, adjusted spacing
-  - Mobile (<768px): Single column, hamburger menu, stacked layouts
-- **Files Modified**: `tailwind.config.js`, `postcss.config.js`, `styles.scss`, `app.scss`, all component SCSS files
-- **Dependencies Added**: `tailwindcss`, `postcss`, `autoprefixer`
-
-### 7.4 Collapsible Left Sidebar Navigation
-
-- **Implementation**: Replaced top navigation with professional left sidebar containing:
-  - Main section: Campaigns
-  - Manage section: Campaign Management, Theme Settings (staff only)
-- **Features**:
-  - Desktop: Always visible, sticky positioning
-  - Mobile/Tablet: Collapsible with hamburger menu, overlay backdrop
-  - Smooth animations and transitions
-  - Active state highlighting
-  - Auto-close on mobile after navigation
-- **Files Modified**: `app.html`, `app.ts`, `app.scss`
-
-### 7.5 Enhanced Color Picker with Preset Palette
-
-- **Implementation**: Added hoverable color palette with 16 preset colors for theme customization.
-- **Features**:
-  - Click-to-select preset colors
-  - Native color picker input
-  - Manual hex code input
-  - Hover effects with scale animation
-- **Files Modified**: `theme-admin.component.html`, `theme-admin.component.ts`, `theme-admin.component.scss`
-
-### 7.6 English Localization for NG-ZORRO Components
-
-- **Implementation**: Configured NG-ZORRO to use English locale (`en_US`) globally.
-- **Fixed Issues**:
-  - Page size dropdown now shows English text
-  - Date picker displays English month names
-  - All component labels in English
-- **Files Modified**: `app.config.ts`
-
-### 7.7 Debounced Search Functionality
-
-- **Implementation**: Added RxJS debounce (300ms) to search input in campaign admin.
-- **Benefits**: Prevents API calls on every keystroke, improves performance, reduces server load.
-- **Files Modified**: `campaign-admin.component.ts`
-
-### 7.8 Date Picker Improvements
-
-- **Implementation**: Fixed date picker language and positioning issues.
-- **Features**:
-  - English date format (`MMM dd, yyyy`)
-  - Proper z-index for dropdown positioning
-  - Full-width responsive date inputs
-- **Files Modified**: `campaign-form.component.html`, `campaign-form.component.scss`
-
-### 7.9 Font Awesome Icons Integration
-
-- **Implementation**: Replaced emoji icons with professional Font Awesome icons throughout the application.
-- **Features**:
-  - Campaigns: `fa-bullhorn`
-  - Campaign Management: `fa-cog`
-  - Theme Settings: `fa-palette`
-  - Action menu: `fa-ellipsis-v`, `fa-edit`, `fa-trash`, `fa-play-circle`, `fa-pause-circle`
-- **Files Modified**: `app.html`, `campaign-admin.component.html`, `styles.scss`
-- **Dependencies Added**: `@fortawesome/fontawesome-free`
-
-### 7.10 Campaign Card Clickable Area
-
-- **Implementation**: Made entire campaign card (image + title) clickable for better UX.
-- **Features**:
-  - Hover effect on title with color change
-  - Image and title wrapped in single link
-  - Description rendered as HTML using `[innerHTML]`
-  - Bold titles for better visual hierarchy
-- **Files Modified**: `campaign-list.component.html`, `campaign-list.component.scss`
-
-### 7.11 Campaign Detail Progress Bar Positioning
-
-- **Implementation**: Moved progress bar above description for immediate visibility.
-- **Features**:
-  - Progress section with subtle background
-  - Better visual hierarchy
-  - Container max-width to prevent text overflow
-- **Files Modified**: `campaign-detail.component.html`, `campaign-detail.component.scss`
-
-### 7.12 Desktop Sidebar Icon-Only Mode
-
-- **Implementation**: Added toggle button for icon-only vs icon+label sidebar mode on desktop.
-- **Features**:
-  - Columns icon in header for toggle
-  - 70px width in icon-only mode
-  - Labels hidden in icon-only mode
-  - Smooth width transitions
-- **Files Modified**: `app.html`, `app.ts`, `app.scss`
-
-### 7.13 Back Button Navigation
-
-- **Implementation**: Added back buttons to campaign create/edit pages.
-- **Features**:
-  - "← Back to Campaigns" link at top of form
-  - Consistent navigation pattern
-  - Hover effects for better UX
-- **Files Modified**: `campaign-form.component.html`, `campaign-form.component.scss`
-
-### 7.14 Responsive Admin Table
-
-- **Implementation**: Made admin table horizontally scrollable on smaller screens.
-- **Features**:
-  - Horizontal scroll wrapper
-  - Touch scrolling on mobile
-  - Visible scroll on desktop only when needed
-- **Files Modified**: `campaign-admin.component.html`, `campaign-admin.component.scss`
-
-### 7.15 Mobile Action Menu with Three-Dot
-
-- **Implementation**: Added three-dot dropdown menu for table actions on mobile/tablet.
-- **Features**:
-  - Desktop: Full action buttons visible
-  - Mobile/Tablet: Three-dot menu with icons
-  - Icons for each action (edit, delete, activate/deactivate)
-  - Professional dropdown positioning
-- **Files Modified**: `campaign-admin.component.html`, `campaign-admin.component.ts`, `campaign-admin.component.scss`
+**Why:** When a developer opens a handler file they see both the handler and its validator — no folder jumping. When they open `CampaignModels.cs` they see both the DTO shape and exactly how it maps from the domain entity.
 
 ---
 
-## 8. Technical Stack Updates
+#### `UpdateCampaignCommand` — no separate body DTO
 
-### New Dependencies
-- `tailwindcss` - Utility-first CSS framework
-- `postcss` - CSS post-processing
-- `autoprefixer` - CSS vendor prefixing
-- `ngx-quill` - Angular Quill rich text editor wrapper
-- `quill` - Rich text editor library
-- `@fortawesome/fontawesome-free` - Professional icon library
+**Before:**
+```csharp
+// Separate record mirroring all fields
+public sealed record UpdateCampaignBody(string Title, ...);
 
-### Configuration Files Added
-- `tailwind.config.js` - Tailwind configuration with CSS variable integration
-- `postcss.config.js` - PostCSS processing configuration
+// Controller spreading every field manually
+new UpdateCampaignCommand(id, body.Title, body.Description, body.TargetAmount, ...)
+```
+
+**After:**
+```csharp
+// Command IS the body — bound directly from JSON
+// Route id attached with one C# record expression
+public Task<IActionResult> Update(Guid id, [FromBody] UpdateCampaignCommand command, ...)
+    => SendAsync(command with { CampaignId = id }, cancellationToken);
+```
+
+**Rule going forward:** If a command's data is entirely from the request body, bind it directly as the command. If one value comes from the route (like `id`), use `with { }`. Never spread fields manually.
 
 ---
 
-## 9. Design Principles Applied
+#### `Commands/Index.cs` — pure application contracts
 
-- **Mobile-First**: All components designed for mobile, enhanced for larger screens
-- **Accessibility**: Proper ARIA labels, keyboard navigation, semantic HTML
-- **Performance**: Debounced inputs, optimized animations, efficient re-renders
-- **Internationalization**: English locale configuration, proper text handling
-- **User Experience**: Smooth transitions, clear feedback, intuitive navigation
-- **Maintainability**: Component-based architecture, reusable utilities, consistent styling
+`UpdateCampaignBody` removed from here. Application layer has no knowledge of HTTP body shapes. The controller is the transport layer — web input models live there.
+
+---
+
+### 3. Exception Hierarchy — `ConflictException` added
+
+**File:** `Application/Common/Exceptions/AppExceptions.cs`
+
+```
+AppException (abstract)
+├── NotFoundException          → 404 NOT_FOUND
+├── BusinessRuleException      → 409 BUSINESS_RULE_VIOLATION
+├── ConflictException          → 409 CONFLICT          ← NEW
+├── ForbiddenAppException      → 403 FORBIDDEN
+└── TenantViolationException   → 403 TENANT_VIOLATION
+```
+
+`ConflictException` is for resource **state conflicts** (e.g. deleting a campaign with donations).  
+`BusinessRuleException` remains for domain rule violations (e.g. editing a completed record).  
+The client can distinguish them by `errorCode`.
+
+`DeleteCampaignCommandHandler` now throws `ConflictException` directly — no `try/catch InvalidOperationException` wrapper.
+
+---
+
+### 4. `ApiControllerBase` — `Mediator` visibility fixed
+
+**Before:** `private ISender Mediator` — subclasses couldn't call it directly.  
+**After:** `protected ISender Mediator` — correct visibility for a shared base-class helper.
+
+---
+
+### 5. `TenantResolutionMiddleware` — dev bypass + precise host handling
+
+**Added:** `MultiTenancy:BypassHosts` config key.  
+**`appsettings.Development.json`:** `"BypassHosts": ["localhost", "127.0.0.1"]`
+
+Plain `localhost` now bypasses tenant resolution in dev — Swagger and health checks work without a subdomain. Production is unaffected.
+
+**Also fixed:** `Host.Host` (hostname only) vs `Host.Value` (hostname:port) — now separated correctly so subdomain matching works with and without explicit port numbers.
+
+---
+
+### 6. `Program.cs` — HTTPS redirect guard + enum-as-string
+
+**HTTPS redirect:** `UseHttpsRedirection()` is now conditional — only activates when not in Development or when an HTTPS URL is actually bound. Eliminated the noisy `warn: Failed to determine the https port` log.
+
+**Enum serialization:**
+```csharp
+.AddJsonOptions(o =>
+    o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+```
+All enums now serialize as `"Active"` not `1`. Frontend receives `status: "Active"` — no integer guessing.
+
+---
+
+### 7. `PagedResult<T>` — enhanced
+
+Added:
+- `TotalPages` computed property — frontend doesn't need to calculate it
+- `static Create(data, total, grid)` factory — no scattered object initializers  
+- `Map<TDto>(selector)` — project to a different DTO type without rebuilding
+
+---
+
+### 8. `QueryableGridExtensions` — single-pass projection overload
+
+**Added:** `ToPagedResultAsync<TSource, TDto>(query, grid, selector, ct)`
+
+**Before (double-pass):**
+```csharp
+var paged = await query.ToPagedResultAsync<Campaign>(grid, ct);
+return paged.Map(c => c.ToListItemDto()); // second list allocation
+```
+
+**After (single-pass):**
+```csharp
+return await query.ToPagedResultAsync(grid, c => c.ToListItemDto(), ct);
+```
+
+One count query + one fetch + one in-memory projection. No intermediate list.
+
+**Also added:** `ApplySearch<T>` — case-insensitive OR search across specified string fields using expression trees.  
+**Also added:** `ApplySort<T>` — sort from a static `Dictionary<string, Expression>` map with a default fallback.
+
+---
+
+### 9. `GetCampaignsQueryHandler` — static sort map
+
+```csharp
+private static readonly Dictionary<string, Expression<Func<Campaign, object>>> SortMap = new(...) { ... };
+```
+
+Allocated once at app startup, not on every request.
+
+---
+
+## Architecture Principles Established (Reference for All Future Modules)
+
+| Concern | Decision |
+|---|---|
+| DTOs + Mappings | Co-located in one `FeatureModels.cs` per feature |
+| Validators | Inside the same `.cs` file as their handler |
+| Command contracts | `Commands/Index.cs` — application contracts only, no HTTP shapes |
+| Controller binding | Body binds directly as command; route id via `with { }` |
+| No fat service | Each handler injects only what it needs (`IApplicationDbContext`, `ITenantContext`, etc.) |
+| Grid pattern | `GridQuery` → `ApplySearch` → `ApplySort` → `ToPagedResultAsync<TSource, TDto>` |
+| Exception HTTP mapping | `AppException` subclass → `GlobalExceptionHandler` → RFC 7807 `ProblemDetails` |
+| Enum wire format | Always string (`JsonStringEnumConverter`) |
+| Dev bypass | `MultiTenancy:BypassHosts` in `appsettings.Development.json` |
+
+---
+
+## Files Changed This Session
+
+| File | Change |
+|---|---|
+| `docs/diagram.md` | **Created** — full UML class diagrams, all layers |
+| `docs/ARCHITECTURE.md` | Updated solution structure tree + controller pattern |
+| `Application/Campaigns/Dtos/CampaignModels.cs` | Merged DTOs + mappings into one file |
+| `Application/Campaigns/Commands/Index.cs` | Removed `UpdateCampaignBody`; pure contracts only |
+| `Application/Campaigns/Commands/CreateCampaignCommandHandler.cs` | Validator co-located |
+| `Application/Campaigns/Commands/UpdateCampaignCommandHandler.cs` | Validator co-located |
+| `Application/Campaigns/Commands/DeleteCampaignCommandHandler.cs` | Uses `ConflictException` directly |
+| `Application/Campaigns/Queries/GetCampaignsQueryHandler.cs` | Static sort map; single-pass projection |
+| `Application/Common/Exceptions/AppExceptions.cs` | `ConflictException` added |
+| `Application/Common/Models/PagedResult.cs` | `TotalPages`, `Create`, `Map` added |
+| `Application/Common/Extensions/QueryableGridExtensions.cs` | Single-pass overload, `ApplySearch`, `ApplySort` |
+| `Web/Controllers/ApiControllerBase.cs` | `Mediator` private → protected |
+| `Web/Controllers/CampaignsController.cs` | Direct body binding; `UpdateCampaignBody` here |
+| `Web/Middleware/TenantResolutionMiddleware.cs` | `BypassHosts`; precise host/port handling |
+| `Web/Program.cs` | Conditional HTTPS redirect; `JsonStringEnumConverter` |
+| `appsettings.Development.json` | `MultiTenancy:BypassHosts` added |

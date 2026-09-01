@@ -387,22 +387,33 @@ InfiniteJourney.Backend/
 │       ├── Aggregates/
 │       │   ├── Tenant/         → Tenant.cs, Theme.cs, ModuleActivation.cs
 │       │   ├── User/           → User.cs, Membership.cs
-│       │   └── Campaign/       → Campaign.cs, Donation.cs
+│       │   └── Campaign/       → Campaign.cs, Donation.cs, Domain Events
 │       └── Common/
-│           └── BaseEntity.cs   → BaseEntity, BaseTenantEntity
+│           └── BaseEntity.cs   → BaseEntity, BaseTenantEntity, IDomainEvent
 │
 ├── Application/
 │   └── InfiniteJourney.Application/
 │       ├── Campaigns/
-│       │   ├── Commands/       → CreateCampaignCommand, ActivateCampaignCommand
-│       │   ├── Queries/        → GetCampaignsQuery, GetCampaignByIdQuery
-│       │   ├── Dtos/           → CampaignDtos.cs
-│       │   └── Mappings/       → CampaignMappings.cs
+│       │   ├── CampaignModels.cs       → ALL DTOs + static mapping extensions (co-located)
+│       │   ├── Commands/
+│       │   │   ├── Index.cs            → All command records (contracts only)
+│       │   │   ├── CreateCampaignCommandHandler.cs   → Handler + Validator in one file
+│       │   │   ├── UpdateCampaignCommandHandler.cs   → Handler + Validator in one file
+│       │   │   ├── DeleteCampaignCommandHandler.cs
+│       │   │   └── ActivateCampaignCommandHandler.cs
+│       │   └── Queries/
+│       │       ├── Index.cs            → All query records (contracts only)
+│       │       ├── GetCampaignsQueryHandler.cs
+│       │       └── GetCampaignByIdQueryHandler.cs
+│       ├── Files/
+│       │   └── Commands/UploadFileCommand.cs
 │       └── Common/
 │           ├── Abstractions/   → ICommand, IQuery, ICommandHandler, IQueryHandler
 │           ├── Behaviors/      → ValidationBehavior (FluentValidation pipeline)
-│           ├── Exceptions/     → TenantViolationException
-│           └── Interfaces/     → IApplicationDbContext, ICurrentUserService, ITenantContext
+│           ├── Exceptions/     → AppException hierarchy (Not Found, Conflict, Forbidden, etc.)
+│           ├── Extensions/     → QueryableGridExtensions (ApplySearch, ApplySort, ToPagedResultAsync)
+│           ├── Interfaces/     → IApplicationDbContext, ICurrentUserService, ITenantContext, IFileStorageService
+│           └── Models/         → GridQuery, PagedResult<T>, ApiErrorResponse
 │
 ├── Infrustructure/
 │   └── InfiniteJourney.Infrustructure/
@@ -416,6 +427,8 @@ InfiniteJourney.Backend/
 │       ├── Identity/
 │       │   ├── AuthenticationDependencyInjection.cs
 │       │   └── CurrentUserService.cs
+│       ├── Storage/
+│       │   └── LocalFileStorageService.cs
 │       └── MultiTenancy/
 │           ├── ITenantResolver.cs
 │           ├── TenantContext.cs
@@ -423,17 +436,23 @@ InfiniteJourney.Backend/
 │
 ├── Web/
 │   └── InfiniteJourney.Web/
-│       ├── Controllers/        → CampaignsController (lean, no business logic)
-│       ├── Middleware/         → TenantResolutionMiddleware
-│       ├── Filters/
-│       ├── Program.cs
+│       ├── Controllers/
+│       │   ├── ApiControllerBase.cs    → SendAsync, SendOrNotFoundAsync, SendCreatedAsync
+│       │   ├── CampaignsController.cs  → Thin; body bound directly as command
+│       │   └── FilesController.cs
+│       ├── Middleware/
+│       │   ├── TenantResolutionMiddleware.cs   → Subdomain → TenantContext; BypassHosts for dev
+│       │   └── GlobalExceptionHandler.cs       → AppException → ProblemDetails
+│       ├── Filters/                    → RequireModuleAttribute
+│       ├── Program.cs                  → DI wiring, JSON enum-as-string, CORS, HTTPS guard
 │       ├── appsettings.json
-│       └── nswag.json          → OpenAPI + client generation config
+│       ├── appsettings.Development.json → MultiTenancy:BypassHosts for localhost dev
+│       └── nswag.json
 │
 └── AppShared/
     └── InfiniteJourney.Global.Shared/
-        ├── Api/                → ApiRoutes.cs (shared route constants)
-        └── Enums/              → Shared enums (CampaignStatus, DonationStatus, etc.)
+        ├── Api/                → ApiRoutes.cs
+        └── Enums/              → PlatformEnums.cs (CampaignStatus, DonationStatus, TenantStatus, etc.)
 ```
 
 ### Dependency Rules (Clean Architecture)
@@ -451,16 +470,19 @@ Web:             references all; hosts DI wiring + HTTP concerns
 
 ### Controller Pattern
 
-Controllers are deliberately thin. Zero business logic, zero mapping:
+Controllers are deliberately thin — zero business logic, zero manual field mapping.  
+The HTTP body is bound directly as the command record. Route params are attached via `with {}`:
 
 ```csharp
+// Body → command directly. No wrapper DTO, no field spreading.
 [HttpPost]
 public Task<IActionResult> Create(CreateCampaignCommand command, CancellationToken ct)
     => SendCreatedAsync(command, ct, r => (nameof(GetById), new { id = r.Id }, r));
 
-[HttpGet(ApiRoutes.Campaigns.ById)]
-public Task<IActionResult> GetById([AsParameters] GetCampaignByIdRoute route, CancellationToken ct)
-    => SendOrNotFoundAsync(new GetCampaignByIdQuery(route.Id), ct);
+// Route id attached in one expression — no intermediate body record needed.
+[HttpPut("{id:guid}")]
+public Task<IActionResult> Update(Guid id, [FromBody] UpdateCampaignCommand command, CancellationToken ct)
+    => SendAsync(command with { CampaignId = id }, ct);
 ```
 
 ---
